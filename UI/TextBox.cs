@@ -12,7 +12,7 @@ public class TextBox : MonoBehaviour
     [SerializeField] private Text dialogueText;
     [SerializeField] private Button continueButton;
     [SerializeField] private float messageSpeed;
-    [SerializeField] private string dialogueFilePath = "Assets/Resources/dialogue_data.csv";
+    [SerializeField] private string dialogueFilePath; // 例："Assets/Scenarios/sample.csv"
     [SerializeField] private string distinationScene; // 遷移先のシーン
 
     private EventSystem eventSystem;

@@ -7,6 +7,8 @@ public class Pilot : MonoBehaviour
 {
     private Unit unit;
 
+    [SerializeField] private string pilotName; // パイロット名
+    public string PilotName { get => pilotName; }
     [SerializeField] private int shootability; // 射撃スキル
     public int Shootability { get => shootability; }
     [SerializeField] private int slashability; // 斬撃スキル
@@ -41,28 +43,10 @@ public class Pilot : MonoBehaviour
     private Controller controller; // コントローラ
     private GameManager gameManager; // ゲーム管理
 
-    // コンストラクタ
-    public Pilot(
-        int shootability,
-        int slashability,
-        int acceleration,
-        int luck,
-        int searchCapacity,
-        AIMode aiMode
-    )
-    {
-        this.shootability = shootability;
-        this.slashability = slashability;
-        this.acceleration = acceleration;
-        this.luck = luck;
-        this.searchCapacity = searchCapacity;
-        this.aiMode = aiMode;
-    }
-
     void Start()
     {
         // 必要な他コンポーネント取得
-        gameManager = GameObject.Find("EventSystem").GetComponent<GameManager>();
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         controller = GameObject.Find("EventSystem").GetComponent<Controller>();
         machine = gameObject.transform.parent.Find("Machine").GetComponent<Machine>();
         unit = gameObject.transform.parent.GetComponent<Unit>();

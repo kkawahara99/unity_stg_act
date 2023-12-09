@@ -7,6 +7,8 @@ public class Machine : MonoBehaviour
 {
 
     /* マシンパラメータ */
+    [SerializeField] private string machineName; // マシン名
+    public string MachineachineName { get => machineName; }
     [SerializeField] private int hitPoint; // 耐久力（HP）
     public int HitPoint { get => hitPoint; }
     [SerializeField] private int propellantPoint; // 推進力（PP）
@@ -43,28 +45,6 @@ public class Machine : MonoBehaviour
     private Shield shield; // シールド情報
     private MapManager mapManager; // マップ情報
     private Pilot pilot;
-
-    // コンストラクタ
-    public Machine(
-        int hitPoint,
-        int propellantPoint,
-        int atc,
-        int def,
-        int spd,
-        GameObject mainWeaponPrefab,
-        GameObject handWeaponPrefab,
-        GameObject shieldPrefab
-    )
-    {
-        this.hitPoint = hitPoint;
-        this.propellantPoint = propellantPoint;
-        this.atc = atc;
-        this.def = def;
-        this.spd = spd;
-        this.mainWeaponPrefab = mainWeaponPrefab;
-        this.handWeaponPrefab = handWeaponPrefab;
-        this.shieldPrefab = shieldPrefab;
-    }
 
     void Start()
     {
@@ -231,6 +211,10 @@ public class Machine : MonoBehaviour
 
         // 爆風を生成
         Instantiate(explosionPrefab, gameObject.transform.position, Quaternion.identity);
+
+        // ユキノのときはゲームオーバーToDo
+        string pilotName = transform.parent.Find("Pilot").GetComponent<Pilot>().PilotName;
+        if (pilotName == "Yukino") Common.Instance.Failed();
     }
 
     // ダウン中からの復帰

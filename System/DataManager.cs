@@ -4,30 +4,21 @@ using UnityEngine;
 
 public class DataManager : MonoBehaviour
 {
-    private static DataManager instance;
+    public static DataManager Instance { get; private set; }
 
     public Station station;
+    public int currentStageNo; // 現在のステージNo
 
     private void Awake()
     {
-        if (instance == null)
+        if (Instance == null)
         {
-            instance = this;
-            DontDestroyOnLoad(this.gameObject);
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
-            Destroy(this.gameObject);
+            Destroy(gameObject);
         }
-    }
-
-    public void SetStation(Station station)
-    {
-        this.station = station;
-    }
-
-    public static DataManager Instance
-    {
-        get { return instance; }
     }
 }

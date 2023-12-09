@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Common : MonoBehaviour
 {
@@ -220,5 +221,23 @@ public class Common : MonoBehaviour
         // 現在HPを減らす
         // 0以下にならないようにする
         return Mathf.Max(currentPP - 10 * Time.deltaTime, 0f);
+    }
+
+    // ミッション成功
+    public void Succeeded()
+    {
+        // エフェクトToDo
+
+        // 画面遷移
+        SceneManager.LoadScene("StrategyScene");
+    }
+
+    // ミッション失敗
+    public void Failed()
+    {
+        // エフェクトToDo
+
+        // 画面遷移
+        SceneManager.LoadScene("TitleScene");
     }
 }

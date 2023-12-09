@@ -147,6 +147,12 @@ public class Station : MonoBehaviour
         // 爆風を生成
         GameObject explosionObject = Instantiate(explosionPrefab, gameObject.transform.position, Quaternion.identity);
         explosionObject.transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
+
+        // 自軍ステーションの場合ゲームオーバーToDo
+        if (gameObject.tag == "Blue") Common.Instance.Failed();
+
+        // 敵軍ステーションの場合クリアToDo
+        if (gameObject.tag == "Red") Common.Instance.Succeeded();
     }
 
     public void AddUnit(Unit unit)

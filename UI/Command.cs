@@ -5,6 +5,7 @@ public class Command : MonoBehaviour
 {
     [SerializeField] private string distinationScene; // 遷移先のシーン
     [SerializeField] private EventType eventType; // イベントタイプ
+    [SerializeField] private bool isNextStage; // ステージ進めるか
 
     public enum EventType
     {
@@ -12,10 +13,6 @@ public class Command : MonoBehaviour
         SmallScreen, // 小画面を表示
         Quit,        // ゲームをやめる
         Other,       // その他（ToDo）
-    }
-
-    void Start()
-    {
     }
 
     // コマンドのイベント
@@ -39,6 +36,9 @@ public class Command : MonoBehaviour
     // 画面遷移
     void TransitionAnotherScene()
     {
+        // 「次のステージへ」のときは現在のステージNoをインクリメント
+        if (isNextStage) DataManager.Instance.currentStageNo += 1;
+
         SceneManager.LoadScene(distinationScene);
     }
 
