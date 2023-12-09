@@ -26,14 +26,9 @@ public class Shield : MonoBehaviour
     public int Def { get => def; }
     public Vector2 EquipmentPosition { get => equipmentPosition; }
 
-    private Calculator calc;
-    private Common common;
-
     void Start()
     {
         // 必要な他コンポーネント取得
-        common = GetComponent<Common>();
-        calc = GetComponent<Calculator>();
         pilot = gameObject.transform.parent.parent.parent.parent.Find("Pilot").GetComponent<Pilot>();
         machine = gameObject.transform.parent.parent.parent.GetComponent<Machine>();
         
@@ -59,14 +54,14 @@ public class Shield : MonoBehaviour
             ContactPoint2D contact = collision.contacts[0];
 
             // 衝突イベントを判定
-            int ret = common.DecideEvent(contact, def, pilot.Luck, calc);
+            int ret = Common.Instance.DecideEvent(contact, def, pilot.Luck);
             if (ret > 0)
             {
                 // 0より大きい場合、ダメージ処理
-                currentHP = common.DecreaseHP(currentHP, ret);
+                currentHP = Common.Instance.DecreaseHP(currentHP, ret);
 
                 // 爆風生成
-                common.GenerateExplosion(contact, explosionPrefab);
+                Common.Instance.GenerateExplosionWhenHitted(contact);
 
                 // ダウンの状態に遷移
                 StartCoroutine(ComeBackFromDown());
@@ -78,13 +73,13 @@ public class Shield : MonoBehaviour
     IEnumerator ComeBackFromDown()
     {
         isDown = true;
-        StartCoroutine(common.ComeBackFromDown(gameObject, comeBackTime));
+        StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, comeBackTime));
 
         while (isDown)
         {
             // CommonのisDownがfalseになったとき
             // こっちのisDownもfalseにする
-            if (!common.IsDown) isDown = false;
+            if (!Common.Instance.IsDown) isDown = false;
             yield return null;
         }
     }

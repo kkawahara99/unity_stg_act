@@ -53,7 +53,7 @@ public class Ballet : MonoBehaviour
     public void SetSpeed(Vector2 direction)
     {
         // 速度変更
-        currentVelocity = GetComponent<Calculator>().calculateTargetVelocity(direction, weapon.MaxSpeed, false);
+        currentVelocity = Calculator.Instance.calculateTargetVelocity(direction, weapon.MaxSpeed, false);
     }
 
     // 接触時の処理

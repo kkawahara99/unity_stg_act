@@ -6,7 +6,6 @@ public class CameraController : MonoBehaviour
 {
     private float cameraTrackingSpeed = 1.0f;
     private Camera mainCamera;
-    private Calculator calc;
 
     void Start()
     {
@@ -14,7 +13,6 @@ public class CameraController : MonoBehaviour
         mainCamera = Camera.main;
 
         // 必要な他コンポーネント取得
-        calc = GetComponent<Calculator>();
     }
     void Update()
     {
@@ -42,8 +40,8 @@ public class CameraController : MonoBehaviour
         transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * cameraTrackingSpeed);
         
         // カメラサイズをキャラの索敵能力に合わせて変更
-        mainCamera.orthographicSize = calc.CalculateZoomRate(searchCapacity);
-        float scale = calc.CalculateBackgroundSize(searchCapacity);
+        mainCamera.orthographicSize = Calculator.Instance.CalculateZoomRate(searchCapacity);
+        float scale = Calculator.Instance.CalculateBackgroundSize(searchCapacity);
         transform.Find("Background").localScale = new Vector3(scale, scale, scale);
     }
 

@@ -109,6 +109,9 @@ public class Weapon : MonoBehaviour
 
         // 弾の発射
         ballet.SetSpeed(direction.normalized);
+
+        // 効果音
+        SoundManager.Instance.PlaySE(SESoundData.SE.Shoot1);
     }
 
     // 発射位置を計算

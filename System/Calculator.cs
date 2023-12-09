@@ -4,7 +4,22 @@ using UnityEngine;
 
 public class Calculator : MonoBehaviour
 {
-    private float bounceFactor = 1f; // 反発係数
+    private float bounceFactor = 1.2f; // 反発係数
+
+    public static Calculator Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
     // ダメージ計算
     public int CalculateDamage(int weaponAtc, int offenseLuck, int deffenceDef, int deffenceLuck)
@@ -42,7 +57,7 @@ public class Calculator : MonoBehaviour
     // 索敵範囲計算
     public float CalculateSearchRange(int searchCapacity)
     {
-        return 4.8f + (float)searchCapacity / 50;
+        return 4f + (float)searchCapacity / 50;
     }
 
     // 衝突速度計算
@@ -83,7 +98,7 @@ public class Calculator : MonoBehaviour
     // 加速度に応じた速度の計算
     public Vector2 calculateCurrentVelocity(Vector2 currentVelocity, Vector2 targetVelocity, int acceleration)
     {
-        return Vector2.Lerp(currentVelocity, targetVelocity, Time.deltaTime * (float)acceleration / 8);
+        return Vector2.Lerp(currentVelocity, targetVelocity, Time.deltaTime * (float)acceleration / 6);
     }
 
     // 推進剤チャージスピード計算

@@ -48,6 +48,10 @@ public class Menu : MonoBehaviour
         if (controller.MovePhase != InputActionPhase.Started) return;
 
         controller.SetMovePhase(InputActionPhase.Performed);
+
+        // 効果音
+        SoundManager.Instance.PlaySE(SESoundData.SE.Select);
+
         Vector2 direction = controller._direction;
         Debug.Log(direction);
 
@@ -67,12 +71,16 @@ public class Menu : MonoBehaviour
 
         controller.SetShootPhase(InputActionPhase.Performed);
 
-        // 選択したボタンのメニューを生成する
-        int n = GetButtonIndex(currentSelected.GetComponent<Selectable>());
-        GameObject newMenuObject = Instantiate(menuPrefabs[n], transform.parent);
+        // 効果音
+        SoundManager.Instance.PlaySE(SESoundData.SE.Submit);
+
+        // 選択したボタンのイベントを実行する
+        currentSelected.GetComponent<Command>().CommandEvent();
+
+        // GameObject newMenuObject = Instantiate(menuPrefabs[n], transform.parent);
 
         // 生成した新しいメニューにこのメニュー情報を渡す
-        newMenuObject.GetComponent<Menu>().SetPreviousMenu(this.gameObject);
+        // newMenuObject.GetComponent<Menu>().SetPreviousMenu(this.gameObject);
 
         // このメニューを非活性にする
         isActive = false;
@@ -86,6 +94,12 @@ public class Menu : MonoBehaviour
         Debug.Log("Cancel");
 
         controller.SetSlashPhase(InputActionPhase.Performed);
+
+        // 効果音
+        SoundManager.Instance.PlaySE(SESoundData.SE.Cancel);
+
+        // 前メニューがなければなにもしない
+        if (previousMenu == null) return;
 
         // 前メニューを活性にする
         previousMenu.GetComponent<Menu>().SetIsActive(true);

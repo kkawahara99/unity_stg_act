@@ -38,8 +38,6 @@ public class Pilot : MonoBehaviour
     private float lastKeyPressTime = 0f; // 前回のキー押下時間
     private float dashThreshold = 0.25f; // ダッシュ閾値
     private Vector2 currentDirection; // 現在の入力方向
-
-    private Calculator calc;
     private Controller controller; // コントローラ
     private GameManager gameManager; // ゲーム管理
 
@@ -68,7 +66,6 @@ public class Pilot : MonoBehaviour
         controller = GameObject.Find("EventSystem").GetComponent<Controller>();
         machine = gameObject.transform.parent.Find("Machine").GetComponent<Machine>();
         unit = gameObject.transform.parent.GetComponent<Unit>();
-        calc = GetComponent<Calculator>();
 
         // マシンにパイロット情報を渡す
         machine.SetPilot(GetComponent<Pilot>());
@@ -220,7 +217,7 @@ public class Pilot : MonoBehaviour
     GameObject SearchTarget(int searchCapacity)
     {
         // 索敵範囲
-        float searchRange = calc.CalculateSearchRange(searchCapacity);
+        float searchRange = Calculator.Instance.CalculateSearchRange(searchCapacity);
 
         if (unit.IsManual)
         {

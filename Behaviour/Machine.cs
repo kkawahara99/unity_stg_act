@@ -42,9 +42,6 @@ public class Machine : MonoBehaviour
     private float currentPP; // 現在の推進力
     private Shield shield; // シールド情報
     private MapManager mapManager; // マップ情報
-
-    private Calculator calc;
-    private Common common;
     private Pilot pilot;
 
     // コンストラクタ
@@ -72,8 +69,6 @@ public class Machine : MonoBehaviour
     void Start()
     {
         // 必要な他コンポーネント取得
-        common = GetComponent<Common>();
-        calc = GetComponent<Calculator>();
         rb = gameObject.transform.parent.GetComponent<Rigidbody2D>();
         mapManager = GameObject.Find("MapManager").GetComponent<MapManager>();
         unit = gameObject.transform.parent.GetComponent<Unit>();
@@ -102,7 +97,7 @@ public class Machine : MonoBehaviour
         }
 
         // スプライトの色を変更
-        common.SetColors(unit.Color);
+        Common.Instance.SetColors(unit.Color, transform);
 
         // 推進剤チャージコルーチン開始
         StartCoroutine(ChargePropellant());
@@ -185,7 +180,7 @@ public class Machine : MonoBehaviour
         rb.velocity = currentVelocity;
 
         // 移動位置を制限
-        common.RestrictMovePosition(rb, mapManager.MaxX, mapManager.MinX, mapManager.MaxY, mapManager.MinY);
+        Common.Instance.RestrictMovePosition(rb, mapManager.MaxX, mapManager.MinX, mapManager.MaxY, mapManager.MinY);
     }
 
     // 接触時の処理
@@ -197,20 +192,20 @@ public class Machine : MonoBehaviour
             ContactPoint2D contact = collision.contacts[0];
 
             // 衝突したオブジェクトとの跳ね返りを計算
-            currentVelocity = common.CalculateVelocity(contact, currentVelocity, spd, calc);
+            currentVelocity = Common.Instance.CalculateVelocity(contact, currentVelocity, spd);
 
             // 衝突イベントを判定
-            int ret = common.DecideEvent(contact, def, pilot.Luck, calc);
+            int ret = Common.Instance.DecideEvent(contact, def, pilot.Luck);
             if (ret > 0)
             {
                 // 0より大きい場合、ダメージ処理
-                currentHP = common.DecreaseHP(currentHP, ret);
+                currentHP = Common.Instance.DecreaseHP(currentHP, ret);
 
                 // HPゲージ更新
                 UpdateHPUI();
 
                 // 爆風生成
-                common.GenerateExplosion(contact, explosionPrefab);
+                Common.Instance.GenerateExplosionWhenHitted(contact);
 
                 // ダウンの状態に遷移
                 StartCoroutine(ComeBackFromDown());
@@ -242,13 +237,13 @@ public class Machine : MonoBehaviour
     IEnumerator ComeBackFromDown()
     {
         isDown = true;
-        StartCoroutine(common.ComeBackFromDown(gameObject, comeBackTime));
+        StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, comeBackTime));
 
         while (isDown)
         {
             // CommonのisDownがfalseになったとき
             // こっちのisDownもfalseにする
-            if (!common.IsDown) isDown = false;
+            if (!Common.Instance.IsDown) isDown = false;
             yield return null;
         }
     }
@@ -269,17 +264,17 @@ public class Machine : MonoBehaviour
             DashBehaviour(true);
 
             // ダッシュ時はスピード+10、加速2倍
-            int dashSpeed = calc.GetDashSpeed(spd);
-            int dashAccel = calc.GetDashAccel(pilot.Acceleration);
+            int dashSpeed = Calculator.Instance.GetDashSpeed(spd);
+            int dashAccel = Calculator.Instance.GetDashAccel(pilot.Acceleration);
 
             // 目標速度を計算
-            Vector2 targetVelocity = calc.calculateTargetVelocity(direction, dashSpeed, isDefence);
+            Vector2 targetVelocity = Calculator.Instance.calculateTargetVelocity(direction, dashSpeed, isDefence);
 
             // 加速度に応じた速度の適用
-            currentVelocity = calc.calculateCurrentVelocity(currentVelocity, targetVelocity, dashAccel);
+            currentVelocity = Calculator.Instance.calculateCurrentVelocity(currentVelocity, targetVelocity, dashAccel);
 
             // PPを減らす
-            currentPP = common.DecreasePP(currentPP);
+            currentPP = Common.Instance.DecreasePP(currentPP);
 
             // PPゲージ更新
             UpdatePPUI();
@@ -287,10 +282,10 @@ public class Machine : MonoBehaviour
         else
         {
             // 目標速度を計算
-            Vector2 targetVelocity = calc.calculateTargetVelocity(direction, spd, isDefence);
+            Vector2 targetVelocity = Calculator.Instance.calculateTargetVelocity(direction, spd, isDefence);
 
             // 速度変更
-            currentVelocity = calc.calculateCurrentVelocity(currentVelocity, targetVelocity, pilot.Acceleration);
+            currentVelocity = Calculator.Instance.calculateCurrentVelocity(currentVelocity, targetVelocity, pilot.Acceleration);
 
             DashBehaviour(false);
         }
@@ -479,7 +474,7 @@ public class Machine : MonoBehaviour
         weapon.Launch(angle);
 
         // しばらくウェイト（射撃スキル依存）
-        float waitTime = calc.CalculateWaitTime(pilot.Shootability);
+        float waitTime = Calculator.Instance.CalculateWaitTime(pilot.Shootability);
         yield return new WaitForSeconds(waitTime);
 
         // 右腕を元の位置へ
@@ -510,9 +505,12 @@ public class Machine : MonoBehaviour
         rightArmTransform.Find("Elbow").Find("Weapons").Find("MainWeapon").gameObject.SetActive(false);
         rightArmTransform.Find("Elbow").Find("Weapons").Find("HandWeapon").gameObject.SetActive(true);
 
+        // 効果音
+        SoundManager.Instance.PlaySE(SESoundData.SE.Slash1);
+
         // 右腕を振り下ろす
         float upRotation = -105f;
-        float swingSpeed = calc.CalculateSwingSpeed(pilot.Slashability);
+        float swingSpeed = Calculator.Instance.CalculateSwingSpeed(pilot.Slashability);
         while(upRotation < -1f)
         {
             float newRotation = Mathf.LerpAngle(upRotation, 0f, Time.deltaTime * swingSpeed);
@@ -522,7 +520,7 @@ public class Machine : MonoBehaviour
         }
         // しばらくウェイト（斬撃スキル依存）
         rightArmTransform.Find("Elbow").Find("Weapons").Find("HandWeapon").gameObject.SetActive(false);
-        float waitTime = calc.CalculateWaitTime(pilot.Slashability);
+        float waitTime = Calculator.Instance.CalculateWaitTime(pilot.Slashability);
         yield return new WaitForSeconds(waitTime);
 
         // メイン武器に持ち替える
@@ -547,7 +545,7 @@ public class Machine : MonoBehaviour
             if (currentPP < propellantPoint && !isDashing)
             {
                 // チャージ速度に応じて PPを増やす
-                float chargeSpeed = calc.calculateChargeSpeed(propellantPoint);
+                float chargeSpeed = Calculator.Instance.calculateChargeSpeed(propellantPoint);
                 currentPP = Mathf.Min(currentPP + chargeSpeed, propellantPoint);
                 chargeUI.UpdateChargeUI((int)currentPP, propellantPoint);
             }

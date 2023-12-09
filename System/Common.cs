@@ -4,13 +4,29 @@ using UnityEngine;
 
 public class Common : MonoBehaviour
 {
+    [SerializeField] GameObject explosionPrefab; // 爆風プレハブ
     private bool isDown;
     public bool IsDown { get => isDown; }
 
-    // 色を変更
-    public void SetColors(Color color)
+    public static Common Instance { get; private set; }
+
+    private void Awake()
     {
-        SpriteRenderer[] spriteRenderers = GetComponentsInChildren<SpriteRenderer>(true);
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    // 色を変更
+    public void SetColors(Color color, Transform transform)
+    {
+        SpriteRenderer[] spriteRenderers = transform.GetComponentsInChildren<SpriteRenderer>(true);
         foreach (SpriteRenderer spriteRenderer in spriteRenderers)
         {
             List<string> noColorObjects = new List<string> {"MainWeapon", "HandWeapon", "Shiled"};
@@ -47,7 +63,7 @@ public class Common : MonoBehaviour
     }
 
     // 衝突時のベクトルを計算
-    public Vector2 CalculateVelocity(ContactPoint2D contact, Vector2 currentVelocity, int spd, Calculator calc)
+    public Vector2 CalculateVelocity(ContactPoint2D contact, Vector2 currentVelocity, int spd)
     {
         Vector2 result;
         GameObject collidedObject = contact.collider.gameObject;
@@ -68,17 +84,17 @@ public class Common : MonoBehaviour
             if (dotProduct > 0f)
             {
                 // 同じ方向ならベクトル加算
-                result = currentVelocity + calc.calculateBounceVelocity(collisionNormal);
+                result = currentVelocity + Calculator.Instance.calculateBounceVelocity(collisionNormal);
             }
             else
             {
                 // 逆方向なら反射
-                result = calc.calculateBounceVelocity(Vector2.Reflect(currentVelocity, collisionNormal));
+                result = Calculator.Instance.calculateBounceVelocity(Vector2.Reflect(currentVelocity, collisionNormal));
             }
         }
 
         // 跳ね返りベクトルは一定値以上にならないようにする
-        Vector2 maxVelocity = calc.calculateBounceVelocity(calc.calculateTargetVelocity(Vector2.one.normalized, spd, false));
+        Vector2 maxVelocity = Calculator.Instance.calculateBounceVelocity(Calculator.Instance.calculateTargetVelocity(Vector2.one.normalized, spd, false));
         result.x = Mathf.Min(result.x, maxVelocity.x);
         result.y = Mathf.Min(result.y, maxVelocity.y);
 
@@ -86,7 +102,7 @@ public class Common : MonoBehaviour
     }
 
     // 接触時のイベント分岐
-    public int DecideEvent(ContactPoint2D contact, int def, int deffenceLuck, Calculator calc)
+    public int DecideEvent(ContactPoint2D contact, int def, int deffenceLuck)
     {
         int damageValue = 0;
 
@@ -101,7 +117,7 @@ public class Common : MonoBehaviour
             int luck = collidedBallet.Pilot.Luck;
 
             // ダメージ処理
-            damageValue = calc.CalculateDamage(atc, luck, def, deffenceLuck);
+            damageValue = Calculator.Instance.CalculateDamage(atc, luck, def, deffenceLuck);
         }
         else if (collidedWeapon != null)
         {
@@ -110,7 +126,7 @@ public class Common : MonoBehaviour
             int luck = collidedWeapon.Pilot.Luck;
 
             // ダメージ処理
-            damageValue = calc.CalculateDamage(atc, luck, def, deffenceLuck);
+            damageValue = Calculator.Instance.CalculateDamage(atc, luck, def, deffenceLuck);
         }
         else
         {
@@ -121,10 +137,16 @@ public class Common : MonoBehaviour
     }
 
     // 被弾時爆風生成
-    public void GenerateExplosion(ContactPoint2D contact, GameObject explosionPrefab)
+    public void GenerateExplosionWhenHitted(ContactPoint2D contact)
     {
-        GameObject explosionObject = Instantiate(explosionPrefab, contact.point, Quaternion.identity);
-        explosionObject.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
+        GenerateExplosion(contact.point, 0.4f);
+    }
+
+    // 爆風生成
+    public void GenerateExplosion(Vector2 position, float size)
+    {
+        GameObject explosionObject = Instantiate(explosionPrefab, position, Quaternion.identity);
+        explosionObject.transform.localScale = new Vector3(size, size, size);
     }
 
     // ダウン中からの復帰

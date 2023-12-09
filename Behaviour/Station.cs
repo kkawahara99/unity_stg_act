@@ -26,28 +26,27 @@ public class Station : MonoBehaviour
     private float comeBackTime = 0.2f; // ダウン復帰時間
     private bool isDown; // ダウン中かどうか
     private int currentHP; // 現在のHP
-    private Calculator calc;
-    private Common common;
 
     void Start()
     {
         // 必要な他コンポーネント取得
-        common = GetComponent<Common>();
-        calc = GetComponent<Calculator>();
 
         // ステータス初期化
         currentHP = hitPoint;
 
         // 初期ユニット登録(仮)
-        units = new List<Unit>();
         Vector2 unitPosition = new Vector2(transform.position.x + 0.5f, transform.position.y);
-        GameObject unitObject = Instantiate(unitPrefab, unitPosition, Quaternion.identity);
-        Unit unit = unitObject.GetComponent<Unit>();
-        unit.SetMachinePrefab(machineObjects[0]);
-        unit.SetPilotPrefab(pilotObjects[0]);
-        unit.SetColor(new Color(0.5f, 0.5f, 1f, 1f));
+        if (gameObject.tag == "Blue")
+        {
+            units = new List<Unit>();
+            GameObject unitObject = Instantiate(unitPrefab, unitPosition, Quaternion.identity);
+            Unit unit = unitObject.GetComponent<Unit>();
+            unit.SetMachinePrefab(machineObjects[0]);
+            unit.SetPilotPrefab(pilotObjects[0]);
+            unit.SetColor(new Color(0.5f, 0.5f, 1f, 1f));
 
-        AddUnit(unit);
+            AddUnit(unit);
+        }
 
         // ユニットを展開する
 
@@ -83,14 +82,17 @@ public class Station : MonoBehaviour
             ContactPoint2D contact = collision.contacts[0];
 
             // 衝突イベントを判定
-            int ret = common.DecideEvent(contact, def, luck, calc);
+            int ret = Common.Instance.DecideEvent(contact, def, luck);
             if (ret > 0)
             {
                 // 0より大きい場合、爆風生成
-                common.GenerateExplosion(contact, explosionPrefab);
+                Common.Instance.GenerateExplosionWhenHitted(contact);
 
-                // Brokenタイプの隕石の場合、ダメージ処理
-                currentHP = common.DecreaseHP(currentHP, ret);
+                // ダメージ処理
+                currentHP = Common.Instance.DecreaseHP(currentHP, ret);
+
+                // HPゲージ更新
+                UpdateHPUI();
 
                 // ダウンの状態に遷移
                 StartCoroutine(ComeBackFromDown());
@@ -98,17 +100,24 @@ public class Station : MonoBehaviour
         }
     }
 
+    // HPゲージ更新
+    void UpdateHPUI()
+    {
+        ChargeUI chargeUI = gameObject.transform.Find("ParamUI").Find("HPGauge").GetComponent<ChargeUI>();
+        chargeUI.UpdateChargeUI(currentHP, hitPoint);
+    }
+
     // ダウン中からの復帰
     IEnumerator ComeBackFromDown()
     {
         isDown = true;
-        StartCoroutine(common.ComeBackFromDown(gameObject, comeBackTime));
+        StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, comeBackTime));
 
         while (isDown)
         {
             // CommonのisDownがfalseになったとき
             // こっちのisDownもfalseにする
-            if (!common.IsDown) isDown = false;
+            if (!Common.Instance.IsDown) isDown = false;
             yield return null;
         }
     }

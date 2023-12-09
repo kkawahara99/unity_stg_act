@@ -30,14 +30,10 @@ public class Meteo : MonoBehaviour
     public int HitPoint { get => hitPoint; }
 
     private Rigidbody2D rb;
-    private Calculator calc;
-    private Common common;
 
     void Start()
     {
         // 必要な他コンポーネント取得
-        common = GetComponent<Common>();
-        calc = GetComponent<Calculator>();
         rb = GetComponent<Rigidbody2D>();
 
         // ステータス初期化
@@ -62,16 +58,16 @@ public class Meteo : MonoBehaviour
             ContactPoint2D contact = collision.contacts[0];
 
             // 衝突イベントを判定
-            int ret = common.DecideEvent(contact, def, luck, calc);
+            int ret = Common.Instance.DecideEvent(contact, def, luck);
             if (ret > 0)
             {
                 // 0より大きい場合、爆風生成
-                common.GenerateExplosion(contact, explosionPrefab);
+                Common.Instance.GenerateExplosionWhenHitted(contact);
 
                 if (meteoTypte == MeteoType.Broken)
                 {
                     // Brokenタイプの隕石の場合、ダメージ処理
-                    currentHP = common.DecreaseHP(currentHP, ret);
+                    currentHP = Common.Instance.DecreaseHP(currentHP, ret);
 
                     // ダウンの状態に遷移
                     StartCoroutine(ComeBackFromDown());
@@ -84,13 +80,13 @@ public class Meteo : MonoBehaviour
     IEnumerator ComeBackFromDown()
     {
         isDown = true;
-        StartCoroutine(common.ComeBackFromDown(gameObject, comeBackTime));
+        StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, comeBackTime));
 
         while (isDown)
         {
             // CommonのisDownがfalseになったとき
             // こっちのisDownもfalseにする
-            if (!common.IsDown) isDown = false;
+            if (!Common.Instance.IsDown) isDown = false;
             yield return null;
         }
     }

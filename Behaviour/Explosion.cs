@@ -8,7 +8,13 @@ public class Explosion : MonoBehaviour
 
     void Start()
     {
+        // 角度をランダムにする
         transform.rotation = Quaternion.Euler(0, 0, Random.value * 360);
+
+        // 効果音
+        SoundManager.Instance.PlaySE(SESoundData.SE.Explosion1);
+
+        // 消す
         Destroy(gameObject, exprosionTime);
     }
 
