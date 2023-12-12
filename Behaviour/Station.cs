@@ -46,13 +46,13 @@ public class Station : MonoBehaviour
             unit.SetColor(new Color(0.5f, 0.5f, 1f, 1f));
 
             AddUnit(unit);
+
+            // ユニットを展開する
+            DeployUnits(unitPosition);
+
+            // プレイヤーにカメラを合わせる
+            GameObject.Find("Main Camera").GetComponent<CameraController>().trackingPlayer(false);
         }
-
-        // ユニットを展開する
-        DeployUnits(unitPosition);
-
-        // プレイヤーにカメラを合わせる
-        GameObject.Find("Main Camera").GetComponent<CameraController>().trackingPlayer(false);
     }
 
     void Update()
@@ -113,15 +113,15 @@ public class Station : MonoBehaviour
     IEnumerator ComeBackFromDown()
     {
         isDown = true;
-        StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, comeBackTime));
+        StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, comeBackTime, isDown));
 
-        while (isDown)
+        do
         {
             // CommonのisDownがfalseになったとき
             // こっちのisDownもfalseにする
-            if (!Common.Instance.IsDown) isDown = false;
+            if (gameObject.GetComponent<Collider2D>().enabled) isDown = false;
             yield return null;
-        }
+        } while (isDown);
     }
 
     // HPを減らす

@@ -219,15 +219,15 @@ public class Machine : MonoBehaviour
     IEnumerator ComeBackFromDown()
     {
         isDown = true;
-        StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, comeBackTime));
+        StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, comeBackTime, isDown));
 
-        while (isDown)
+        do
         {
             // CommonのisDownがfalseになったとき
             // こっちのisDownもfalseにする
-            if (!Common.Instance.IsDown) isDown = false;
+            if (gameObject.GetComponent<Collider2D>().enabled) isDown = false;
             yield return null;
-        }
+        } while (isDown);
     }
 
     // パイロット情報を設定

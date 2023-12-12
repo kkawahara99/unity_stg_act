@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class Ballet : MonoBehaviour
@@ -14,10 +15,32 @@ public class Ballet : MonoBehaviour
     // 発射された
     void Start()
     {
+        // 必要な他コンポーネント取得
         rb = GetComponent<Rigidbody2D>();
 
         // 回転を制御
         rb.freezeRotation = true;  // 回転を固定
+
+        // 自軍との衝突を無効にする
+        GameObject[] objectsToIgnore = GameObject.FindGameObjectsWithTag(gameObject.tag);
+        foreach (GameObject obj in objectsToIgnore)
+        {
+            Transform machineTransform = obj.transform.Find("Machine");
+            if (machineTransform != null)
+            {
+                Physics2D.IgnoreCollision(GetComponent<Collider2D>(), machineTransform.GetComponent<Collider2D>());
+
+                // 盾を持っている場合は盾も無効
+                Transform shieldTransform = Common.Instance.FindObjectRecursively(machineTransform, "Shield");
+                if (shieldTransform != null)
+                    Physics2D.IgnoreCollision(GetComponent<Collider2D>(), shieldTransform.GetComponent<Collider2D>());
+            }
+            else if (obj.GetComponent<Station>() != null)
+            {
+                // ステーションも無効
+                Physics2D.IgnoreCollision(GetComponent<Collider2D>(), obj.GetComponent<Collider2D>());
+            }
+        }
 
         // しばらくすると消える
         Destroy(this.gameObject, this.weapon.ActiveTime);
@@ -27,6 +50,12 @@ public class Ballet : MonoBehaviour
     {
         // 弾の移動速度を更新
         rb.velocity = currentVelocity;
+    }
+
+    // タグを設定
+    public void SetTag(string tagName)
+    {
+        gameObject.tag = tagName;
     }
 
     // 弾の火力を設定
@@ -57,9 +86,17 @@ public class Ballet : MonoBehaviour
     // 接触時の処理
     void OnCollisionEnter2D(Collision2D collision)
     {
-        // ToDo: 何らかの処理
-
-        // 消える
         Destroy(this.gameObject);
+
+        // if (collision.transform.parent != null)
+        // {
+        //     if (!collision.transform.parent.CompareTag(gameObject.tag))
+        //     {
+        //         // ToDo: 何らかの処理
+        //         // 自軍以外と接触時のみ被弾にする
+        //         gameObject.GetComponent<Collider2D>().isTrigger = false;
+        //         Destroy(this.gameObject);
+        //     }
+        // }
     }
 }

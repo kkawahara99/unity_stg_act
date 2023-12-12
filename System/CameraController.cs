@@ -5,7 +5,7 @@ public class CameraController : MonoBehaviour
     private float cameraTrackingSpeed = 1.0f;
     private Camera mainCamera;
 
-    void Start()
+    void Awake()
     {
         // メインカメラ取得
         mainCamera = Camera.main;

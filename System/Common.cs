@@ -6,8 +6,6 @@ using UnityEngine.SceneManagement;
 public class Common : MonoBehaviour
 {
     [SerializeField] GameObject explosionPrefab; // 爆風プレハブ
-    private bool isDown;
-    public bool IsDown { get => isDown; }
 
     public static Common Instance { get; private set; }
 
@@ -151,9 +149,8 @@ public class Common : MonoBehaviour
     }
 
     // ダウン中からの復帰
-    public IEnumerator ComeBackFromDown(GameObject downObject, float comeBackTime)
+    public IEnumerator ComeBackFromDown(GameObject downObject, float comeBackTime, bool isDown)
     {
-        isDown = true;
         bool isClearness = false;
         float downTime = 0f;
         float transparency;
@@ -239,5 +236,31 @@ public class Common : MonoBehaviour
 
         // 画面遷移
         SceneManager.LoadScene("TitleScene");
+    }
+
+    //　オブジェクトの再起的探索
+    public Transform FindObjectRecursively(Transform parentTransform, string nameToFind)
+    {
+        Transform result = parentTransform.Find(nameToFind);
+
+        if (result != null)
+        {
+            // ヒットすればそのtransformを返す
+            return result;
+        }
+
+        // 再帰的に子オブジェクトを探索
+        for (int i = 0; i < parentTransform.childCount; i++)
+        {
+            Transform child = parentTransform.GetChild(i);
+            result = FindObjectRecursively(child, nameToFind);
+
+            if (result != null)
+            {
+                return result;
+            }
+        }
+
+        return null;
     }
 }

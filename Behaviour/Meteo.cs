@@ -69,25 +69,31 @@ public class Meteo : MonoBehaviour
                     currentHP = Common.Instance.DecreaseHP(currentHP, ret);
 
                     // ダウンの状態に遷移
-                    StartCoroutine(ComeBackFromDown());
+                isDown = true;
+                StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, comeBackTime, isDown));
                 }
             }
         }
+    }
+
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        Debug.Log("Meteo Strike");
     }
 
     // ダウン中からの復帰
     IEnumerator ComeBackFromDown()
     {
         isDown = true;
-        StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, comeBackTime));
+        StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, comeBackTime, isDown));
 
-        while (isDown)
+        do
         {
             // CommonのisDownがfalseになったとき
             // こっちのisDownもfalseにする
-            if (!Common.Instance.IsDown) isDown = false;
+            if (gameObject.GetComponent<Collider2D>().enabled) isDown = false;
             yield return null;
-        }
+        } while (isDown);
     }
 
     // HPを減らす
