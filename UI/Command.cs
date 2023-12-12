@@ -6,6 +6,7 @@ public class Command : MonoBehaviour
     [SerializeField] private string distinationScene; // 遷移先のシーン
     [SerializeField] private EventType eventType; // イベントタイプ
     [SerializeField] private bool isNextStage; // ステージ進めるか
+    [SerializeField] private bool isInit; // ゲーム初期化するか（タイトルではじめから）
 
     public enum EventType
     {
@@ -38,6 +39,9 @@ public class Command : MonoBehaviour
     {
         // 「次のステージへ」のときは現在のステージNoをインクリメント
         if (isNextStage) DataManager.Instance.currentStageNo += 1;
+
+        //　
+        if (isInit) DataManager.Instance.currentStageNo = 0;
 
         SceneManager.LoadScene(distinationScene);
     }

@@ -1,20 +1,27 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class GameManager : MonoBehaviour
 {
+    [SerializeField] private GameObject[] stageMapPrefabs; // ステージマッププレハブ
+
     private bool isPaused = false;
     public bool IsPaused { get => isPaused; }
     private Controller controller; // コントローラ
     private CameraController cameraController; // カメラ
 
-    void Start()
+    void Awake()
     {
         // 必要な他コンポーネント取得
         controller = GameObject.Find("EventSystem").GetComponent<Controller>();
         cameraController = GameObject.Find("Main Camera").GetComponent<CameraController>();
+
+        // 対象のステージNoを取得
+        int currentStageNo = DataManager.Instance.currentStageNo;
+
+        // 対象のステージNoのマップを生成する
+        GameObject mapObject = Instantiate(stageMapPrefabs[currentStageNo], Vector2.zero, Quaternion.identity);
+        mapObject.name = "MapManager";
     }
 
     void Update()

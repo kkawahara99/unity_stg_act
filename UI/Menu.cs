@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -83,7 +82,7 @@ public class Menu : MonoBehaviour
         // newMenuObject.GetComponent<Menu>().SetPreviousMenu(this.gameObject);
 
         // このメニューを非活性にする
-        isActive = false;
+        // isActive = false;
     }
 
     // 取消ボタン

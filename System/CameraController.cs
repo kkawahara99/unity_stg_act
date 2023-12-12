@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraController : MonoBehaviour
@@ -11,16 +9,19 @@ public class CameraController : MonoBehaviour
     {
         // メインカメラ取得
         mainCamera = Camera.main;
-
-        // 必要な他コンポーネント取得
     }
     void Update()
+    {
+        trackingPlayer(true);
+    }
+
+    public void trackingPlayer(bool isLerp)
     {
         // isCpuがfalseのユニットを追跡する（仮）
         Vector2 charaPosition = transform.position;
         int searchCapacity = 10;
-        Unit[] charaInfos = FindObjectsOfType<Unit>();
-        foreach (Unit unit in charaInfos)
+        Unit[] units = FindObjectsOfType<Unit>();
+        foreach (Unit unit in units)
         {
             if (unit != null)
             {
@@ -37,7 +38,15 @@ public class CameraController : MonoBehaviour
         }
         // カメラ位置変更
         Vector3 targetPosition = new Vector3(charaPosition.x, charaPosition.y, -10);
-        transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * cameraTrackingSpeed);
+        if (isLerp)
+        {
+            transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * cameraTrackingSpeed);
+        }
+        else
+        {
+            Debug.Log(targetPosition);
+            transform.position = targetPosition;
+        }
         
         // カメラサイズをキャラの索敵能力に合わせて変更
         mainCamera.orthographicSize = Calculator.Instance.CalculateZoomRate(searchCapacity);
