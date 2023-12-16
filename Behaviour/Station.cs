@@ -11,7 +11,7 @@ public class Station : MonoBehaviour
     [SerializeField] private int def; // 装甲（Def）
     public int Def { get => def; }
     [SerializeField]
-    private int luck = 0; // 運
+    private int luck; // 運
 
     [SerializeField] private GameObject explosionPrefab;
     [SerializeField] private GameObject unitPrefab;
@@ -23,7 +23,7 @@ public class Station : MonoBehaviour
     [SerializeField] private List<GameObject> pilotObjects;
     public List<GameObject> PilotObjects { get => pilotObjects; }
 
-    private float comeBackTime = 0.2f; // ダウン復帰時間
+    const float COME_BACK_TIME = 0.2f; // ダウン復帰時間
     private bool isDown; // ダウン中かどうか
     private int currentHP; // 現在のHP
 
@@ -113,12 +113,11 @@ public class Station : MonoBehaviour
     IEnumerator ComeBackFromDown()
     {
         isDown = true;
-        StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, comeBackTime, isDown));
+        StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, COME_BACK_TIME, isDown));
 
         do
         {
-            // CommonのisDownがfalseになったとき
-            // こっちのisDownもfalseにする
+            // コライダーが有効になったときisDownをfalseにする
             if (gameObject.GetComponent<Collider2D>().enabled) isDown = false;
             yield return null;
         } while (isDown);
@@ -141,10 +140,10 @@ public class Station : MonoBehaviour
     IEnumerator Crush()
     {
         // 削除する
-        Destroy(gameObject, comeBackTime + 0.1f);
+        Destroy(gameObject, COME_BACK_TIME + 0.1f);
 
         // しばらくウェイト
-        yield return new WaitForSeconds(comeBackTime);
+        yield return new WaitForSeconds(COME_BACK_TIME);
 
         // 爆風を生成
         GameObject explosionObject = Instantiate(explosionPrefab, gameObject.transform.position, Quaternion.identity);

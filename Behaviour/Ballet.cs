@@ -5,6 +5,7 @@ public class Ballet : MonoBehaviour
 {
     private int power; // 弾の火力
     public int Power { get => power; }
+    private bool isEnemy; // 敵の弾かどうか
 
     private Rigidbody2D rb;
     private Vector2 currentVelocity;  // 現在の速度
@@ -22,7 +23,8 @@ public class Ballet : MonoBehaviour
         rb.freezeRotation = true;  // 回転を固定
 
         // 自軍との衝突を無効にする
-        GameObject[] objectsToIgnore = GameObject.FindGameObjectsWithTag(gameObject.tag);
+        string color = isEnemy ? "Red" : "Blue";
+        GameObject[] objectsToIgnore = GameObject.FindGameObjectsWithTag(color);
         foreach (GameObject obj in objectsToIgnore)
         {
             Transform machineTransform = obj.transform.Find("Machine");
@@ -52,10 +54,10 @@ public class Ballet : MonoBehaviour
         rb.velocity = currentVelocity;
     }
 
-    // タグを設定
-    public void SetTag(string tagName)
+    // 敵の弾かどうかを設定
+    public void SetIsEnemy(bool isEnemy)
     {
-        gameObject.tag = tagName;
+        this.isEnemy = isEnemy;
     }
 
     // 弾の火力を設定

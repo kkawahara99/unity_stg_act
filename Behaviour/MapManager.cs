@@ -5,20 +5,20 @@ public class MapManager : MonoBehaviour
     [SerializeField]
     private GameObject borderPrefab;
     [SerializeField]
-    private float maxX = 8f;
+    private float maxX;
     public float MaxX { get => maxX; }
     [SerializeField]
-    private float minX = -8f;
+    private float minX;
     public float MinX { get => minX; }
     [SerializeField]
-    private float maxY = 3f;
+    private float maxY;
     public float MaxY { get => maxY; }
     [SerializeField]
-    private float minY = -3f;
+    private float minY;
     public float MinY { get => minY; }
 
     public System.Type targetType = typeof(Unit);
-    private float borderOffset = 0.125f;
+    const float BORDER_OFFSET = 0.125f; // ボーダーの幅の半分の値
 
     void Start()
     {
@@ -30,10 +30,10 @@ public class MapManager : MonoBehaviour
     void displayBorders()
     {
         // ボーダーの位置設定
-        Vector2 upBorderPosition = new Vector2(maxX + minX, maxY + borderOffset);
-        Vector2 downBorderPosition = new Vector2(maxX + minX, minY - borderOffset);
-        Vector2 rightBorderPosition = new Vector2(maxX + borderOffset, maxY + minY);
-        Vector2 leftBorderPosition = new Vector2(minX - borderOffset, maxY + minY);
+        Vector2 upBorderPosition = new Vector2(maxX + minX, maxY + BORDER_OFFSET);
+        Vector2 downBorderPosition = new Vector2(maxX + minX, minY - BORDER_OFFSET);
+        Vector2 rightBorderPosition = new Vector2(maxX + BORDER_OFFSET, maxY + minY);
+        Vector2 leftBorderPosition = new Vector2(minX - BORDER_OFFSET, maxY + minY);
 
         // ボーダー表示
         GameObject upBorderObject = Instantiate(borderPrefab, upBorderPosition, Quaternion.identity, gameObject.transform);
@@ -42,10 +42,18 @@ public class MapManager : MonoBehaviour
         GameObject leftBorderObject = Instantiate(borderPrefab, leftBorderPosition, Quaternion.identity, gameObject.transform);
 
         // ボーダーの長さ設定
-        upBorderObject.transform.localScale = new Vector2(maxX - minX + borderOffset * 4, borderOffset * 2);
-        downBorderObject.transform.localScale = new Vector2(maxX - minX + borderOffset * 4, borderOffset * 2);
-        rightBorderObject.transform.localScale = new Vector2(borderOffset * 2, maxY - minY + borderOffset * 4);
-        leftBorderObject.transform.localScale = new Vector2(borderOffset * 2, maxY - minY + borderOffset * 4);
+        float twoTimes = BORDER_OFFSET * 2; // ボーダーの幅
+        float fourTimes = BORDER_OFFSET * 4; // ボーダーの幅2つ分
+        upBorderObject.transform.localScale = new Vector2(maxX - minX + fourTimes, twoTimes);
+        downBorderObject.transform.localScale = new Vector2(maxX - minX + fourTimes, twoTimes);
+        rightBorderObject.transform.localScale = new Vector2(twoTimes, maxY - minY + fourTimes);
+        leftBorderObject.transform.localScale = new Vector2(twoTimes, maxY - minY + fourTimes);
+
+        // タグ設定
+        upBorderObject.tag = "Wall";
+        downBorderObject.tag = "Wall";
+        rightBorderObject.tag = "Wall";
+        leftBorderObject.tag = "Wall";
     }
 
     // ユニットを展開する

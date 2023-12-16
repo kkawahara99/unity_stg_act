@@ -27,7 +27,7 @@ public class Machine : MonoBehaviour
     [SerializeField] private GameObject explosionPrefab;
 
     private Unit unit; // パラメータ
-    private float comeBackTime = 0.2f; // ダウンからの復帰時間
+    const float COMEBACK_TIME = 0.2f; // ダウンからの復帰時間
     private bool isRight; // 右向きかどうか
 
     private Rigidbody2D rb;
@@ -80,8 +80,6 @@ public class Machine : MonoBehaviour
         // 推進剤チャージコルーチン開始
         StartCoroutine(ChargePropellant());
 
-        // メタ設定初期化
-        comeBackTime = 0.2f;
     }
 
     void Update()
@@ -202,10 +200,10 @@ public class Machine : MonoBehaviour
     IEnumerator Crush()
     {
         // 本体を削除する
-        Destroy(gameObject.transform.parent.gameObject, comeBackTime + 0.1f);
+        Destroy(gameObject.transform.parent.gameObject, COMEBACK_TIME + 0.1f);
 
         // しばらくウェイト
-        yield return new WaitForSeconds(comeBackTime);
+        yield return new WaitForSeconds(COMEBACK_TIME);
 
         // 爆風を生成
         Instantiate(explosionPrefab, gameObject.transform.position, Quaternion.identity);
@@ -219,12 +217,11 @@ public class Machine : MonoBehaviour
     IEnumerator ComeBackFromDown()
     {
         isDown = true;
-        StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, comeBackTime, isDown));
+        StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, COMEBACK_TIME, isDown));
 
         do
         {
-            // CommonのisDownがfalseになったとき
-            // こっちのisDownもfalseにする
+            // コライダーが有効になったときisDownをfalseにする
             if (gameObject.GetComponent<Collider2D>().enabled) isDown = false;
             yield return null;
         } while (isDown);

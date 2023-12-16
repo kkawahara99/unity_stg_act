@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    private float cameraTrackingSpeed = 1.0f;
+    const float CAMERA_TRACKING_SPEED = 1.0f;
     private Camera mainCamera;
 
     void Awake()
@@ -40,11 +40,10 @@ public class CameraController : MonoBehaviour
         Vector3 targetPosition = new Vector3(charaPosition.x, charaPosition.y, -10);
         if (isLerp)
         {
-            transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * cameraTrackingSpeed);
+            transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * CAMERA_TRACKING_SPEED);
         }
         else
         {
-            Debug.Log(targetPosition);
             transform.position = targetPosition;
         }
         

@@ -10,7 +10,7 @@ public class Meteo : MonoBehaviour
     [SerializeField]
     private int luck = 0; // 運
     [SerializeField]
-    private float comeBackTime = 0.2f; // ダウン復帰時間
+    const float COMEBACK_TIME = 0.2f; // ダウン復帰時間
     [SerializeField]
     private GameObject explosionPrefab; // 爆風プレハブ
     [SerializeField]
@@ -70,7 +70,7 @@ public class Meteo : MonoBehaviour
 
                     // ダウンの状態に遷移
                 isDown = true;
-                StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, comeBackTime, isDown));
+                StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, COMEBACK_TIME, isDown));
                 }
             }
         }
@@ -85,12 +85,11 @@ public class Meteo : MonoBehaviour
     IEnumerator ComeBackFromDown()
     {
         isDown = true;
-        StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, comeBackTime, isDown));
+        StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, COMEBACK_TIME, isDown));
 
         do
         {
-            // CommonのisDownがfalseになったとき
-            // こっちのisDownもfalseにする
+            // コライダーが有効になったときisDownをfalseにする
             if (gameObject.GetComponent<Collider2D>().enabled) isDown = false;
             yield return null;
         } while (isDown);
@@ -113,10 +112,10 @@ public class Meteo : MonoBehaviour
     IEnumerator Crush()
     {
         // 削除する
-        Destroy(gameObject, comeBackTime + 0.1f);
+        Destroy(gameObject, COMEBACK_TIME + 0.1f);
 
         // しばらくウェイト
-        yield return new WaitForSeconds(comeBackTime);
+        yield return new WaitForSeconds(COMEBACK_TIME);
 
         // 爆風を生成
         GameObject explosionObject = Instantiate(explosionPrefab, gameObject.transform.position, Quaternion.identity);

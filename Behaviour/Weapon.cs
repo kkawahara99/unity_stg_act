@@ -4,19 +4,19 @@ using UnityEngine;
 public class Weapon : MonoBehaviour
 {
     [SerializeField]
-    private int power = 5; // 火力
+    private int power; // 火力
     [SerializeField]
-    private int balletCost = 25; // 弾コスト
+    private int balletCost; // 弾コスト
     [SerializeField]
     private GameObject balletPrefab; // 弾のプレハブ
     [SerializeField]
-    private float balletOffset = 0.45f; // 弾の生成位置オフセット
+    private float balletOffset; // 弾の生成位置オフセット
     [SerializeField]
-    private int chargeSpeed = 2; // 弾のチャージ速度(stock/100ms)
+    private int chargeSpeed; // 弾のチャージ速度(stock/100ms)
     [SerializeField]
-    private int maxSpeed = 40; // 最大速度
+    private int maxSpeed; // 最大速度
     [SerializeField]
-    private float activeTime = 1.0f; // 有効時間
+    private float activeTime; // 有効時間
     [SerializeField]
     private Vector2 equipmentPosition; // 装備位置
 
@@ -104,7 +104,8 @@ public class Weapon : MonoBehaviour
 
         // 弾に情報渡す
         Ballet ballet = balletObject.GetComponent<Ballet>();
-        ballet.SetTag(unitObject.tag);
+        bool isEnemy = unitObject.tag == "Red" ? true : false;
+        ballet.SetIsEnemy(isEnemy);
         ballet.SetPower(machine.Atc + power);
         ballet.SetPilot(pilot);
         ballet.SetWeapon(gameObject.GetComponent<Weapon>());
