@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 public class ChargeUI : MonoBehaviour
 {
-    public float hideUITime = 3.0f; // ゲージを隠すまでの時間
+    const float HIDE_UI_TIME = 3.0f; // ゲージを隠すまでの時間
 
     private Slider slider;
     private float deltaTime; // ゲージが変わらなかった時間
@@ -30,8 +30,8 @@ public class ChargeUI : MonoBehaviour
     // ゲージを隠すまでの時間を加算
     public void HideTime(float time)
     {
-        deltaTime = Mathf.Min(deltaTime + time, hideUITime);
-        if (deltaTime == hideUITime)
+        deltaTime = Mathf.Min(deltaTime + time, HIDE_UI_TIME);
+        if (deltaTime == HIDE_UI_TIME)
         {
             // 時間になったらUIを隠す
             ShowUI(false);

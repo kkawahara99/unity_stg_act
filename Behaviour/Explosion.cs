@@ -1,10 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Explosion : MonoBehaviour
 {
-    private float exprosionTime = 0.2f;
+    const float EXPLOSION_TIME = 0.2f;
 
     void Start()
     {
@@ -15,7 +13,7 @@ public class Explosion : MonoBehaviour
         SoundManager.Instance.PlaySE(SESoundData.SE.Explosion1);
 
         // 消す
-        Destroy(gameObject, exprosionTime);
+        Destroy(gameObject, EXPLOSION_TIME);
     }
 
 }

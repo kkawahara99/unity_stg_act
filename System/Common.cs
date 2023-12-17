@@ -1,12 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Common : MonoBehaviour
 {
     [SerializeField] GameObject explosionPrefab; // 爆風プレハブ
-    private bool isDown;
-    public bool IsDown { get => isDown; }
 
     public static Common Instance { get; private set; }
 
@@ -94,9 +93,13 @@ public class Common : MonoBehaviour
         }
 
         // 跳ね返りベクトルは一定値以上にならないようにする
-        Vector2 maxVelocity = Calculator.Instance.calculateBounceVelocity(Calculator.Instance.calculateTargetVelocity(Vector2.one.normalized, spd, false));
-        result.x = Mathf.Min(result.x, maxVelocity.x);
-        result.y = Mathf.Min(result.y, maxVelocity.y);
+        Vector2 maxVelocity = Calculator.Instance.calculateBounceVelocity(
+            Calculator.Instance.calculateTargetVelocity(
+                Vector2.one.normalized, spd, false
+            )
+        );
+        result.x = Mathf.Clamp(result.x, -maxVelocity.x, maxVelocity.x);
+        result.y = Mathf.Clamp(result.y, -maxVelocity.y, maxVelocity.y);
 
         return result;
     }
@@ -150,9 +153,8 @@ public class Common : MonoBehaviour
     }
 
     // ダウン中からの復帰
-    public IEnumerator ComeBackFromDown(GameObject downObject, float comeBackTime)
+    public IEnumerator ComeBackFromDown(GameObject downObject, float comeBackTime, bool isDown)
     {
-        isDown = true;
         bool isClearness = false;
         float downTime = 0f;
         float transparency;
@@ -220,5 +222,63 @@ public class Common : MonoBehaviour
         // 現在HPを減らす
         // 0以下にならないようにする
         return Mathf.Max(currentPP - 10 * Time.deltaTime, 0f);
+    }
+
+    // ミッション成功
+    public void Succeeded()
+    {
+        // エフェクトToDo
+
+        // 画面遷移
+        SceneManager.LoadScene("StrategyScene");
+    }
+
+    // ミッション失敗
+    public void Failed()
+    {
+        // エフェクトToDo
+
+        // 画面遷移
+        SceneManager.LoadScene("TitleScene");
+    }
+
+    //　オブジェクトの再起的探索
+    public Transform FindObjectRecursively(Transform parentTransform, string nameToFind)
+    {
+        Transform result = parentTransform.Find(nameToFind);
+
+        if (result != null)
+        {
+            // ヒットすればそのtransformを返す
+            return result;
+        }
+
+        // 再帰的に子オブジェクトを探索
+        for (int i = 0; i < parentTransform.childCount; i++)
+        {
+            Transform child = parentTransform.GetChild(i);
+            result = FindObjectRecursively(child, nameToFind);
+
+            if (result != null)
+            {
+                return result;
+            }
+        }
+
+        return null;
+    }
+
+    // オブジェクト名を指定してGameObjectを検索するメソッド
+    public GameObject FindObjectByName(List<GameObject> objectList, string name)
+    {
+        foreach (GameObject obj in objectList)
+        {
+            if (obj.name == name)
+            {
+                return obj;
+            }
+        }
+        // 見つからなかった場合はnullを返します
+        return null;
     }
 }

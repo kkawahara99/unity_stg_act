@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,6 +14,7 @@ public class Menu : MonoBehaviour
 
     [SerializeField] private GameObject cursorIconPrefab; // カーソルアイコン
     [SerializeField] private List<GameObject> menuPrefabs; // Menuプレハブ
+    public List<GameObject> MenuPrefabs { get => menuPrefabs; }
 
     private void Start()
     {
@@ -75,7 +75,7 @@ public class Menu : MonoBehaviour
         SoundManager.Instance.PlaySE(SESoundData.SE.Submit);
 
         // 選択したボタンのイベントを実行する
-        currentSelected.GetComponent<Command>().CommandEvent();
+        currentSelected.GetComponent<Command>().CommandEvent(gameObject);
 
         // GameObject newMenuObject = Instantiate(menuPrefabs[n], transform.parent);
 
@@ -83,7 +83,7 @@ public class Menu : MonoBehaviour
         // newMenuObject.GetComponent<Menu>().SetPreviousMenu(this.gameObject);
 
         // このメニューを非活性にする
-        isActive = false;
+        // isActive = false;
     }
 
     // 取消ボタン

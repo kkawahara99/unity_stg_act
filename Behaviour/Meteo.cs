@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Meteo : MonoBehaviour
@@ -11,7 +10,7 @@ public class Meteo : MonoBehaviour
     [SerializeField]
     private int luck = 0; // 運
     [SerializeField]
-    private float comeBackTime = 0.2f; // ダウン復帰時間
+    const float COMEBACK_TIME = 0.2f; // ダウン復帰時間
     [SerializeField]
     private GameObject explosionPrefab; // 爆風プレハブ
     [SerializeField]
@@ -70,25 +69,30 @@ public class Meteo : MonoBehaviour
                     currentHP = Common.Instance.DecreaseHP(currentHP, ret);
 
                     // ダウンの状態に遷移
-                    StartCoroutine(ComeBackFromDown());
+                isDown = true;
+                StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, COMEBACK_TIME, isDown));
                 }
             }
         }
+    }
+
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        Debug.Log("Meteo Strike");
     }
 
     // ダウン中からの復帰
     IEnumerator ComeBackFromDown()
     {
         isDown = true;
-        StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, comeBackTime));
+        StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, COMEBACK_TIME, isDown));
 
-        while (isDown)
+        do
         {
-            // CommonのisDownがfalseになったとき
-            // こっちのisDownもfalseにする
-            if (!Common.Instance.IsDown) isDown = false;
+            // コライダーが有効になったときisDownをfalseにする
+            if (gameObject.GetComponent<Collider2D>().enabled) isDown = false;
             yield return null;
-        }
+        } while (isDown);
     }
 
     // HPを減らす
@@ -108,10 +112,10 @@ public class Meteo : MonoBehaviour
     IEnumerator Crush()
     {
         // 削除する
-        Destroy(gameObject, comeBackTime + 0.1f);
+        Destroy(gameObject, COMEBACK_TIME + 0.1f);
 
         // しばらくウェイト
-        yield return new WaitForSeconds(comeBackTime);
+        yield return new WaitForSeconds(COMEBACK_TIME);
 
         // 爆風を生成
         GameObject explosionObject = Instantiate(explosionPrefab, gameObject.transform.position, Quaternion.identity);

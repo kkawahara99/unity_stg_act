@@ -1,10 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Calculator : MonoBehaviour
 {
-    private float bounceFactor = 1.2f; // 反発係数
+    const float BOUNCE_FACTOR = 1.1f; // 反発係数
 
     public static Calculator Instance { get; private set; }
 
@@ -25,7 +23,7 @@ public class Calculator : MonoBehaviour
     public int CalculateDamage(int weaponAtc, int offenseLuck, int deffenceDef, int deffenceLuck)
     {
         float criticalRate;
-        float criticalFactor = 1f;;
+        float criticalFactor = 1f;
         // クリティカル率(%) = (攻撃側の運 / 受け側の運)  + 4
         // 攻撃側の運が0の時はクリティカル率0%、受け側の運が0の時は受け側の運は1
         // クリティカル率最大30％
@@ -63,7 +61,7 @@ public class Calculator : MonoBehaviour
     // 衝突速度計算
     public Vector2 calculateBounceVelocity(Vector2 velocity)
     {
-        return velocity * bounceFactor;
+        return velocity * BOUNCE_FACTOR;
     }
 
     // ダッシュ時のスピード返却

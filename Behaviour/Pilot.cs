@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -7,6 +6,8 @@ public class Pilot : MonoBehaviour
 {
     private Unit unit;
 
+    [SerializeField] private string pilotName; // パイロット名
+    public string PilotName { get => pilotName; }
     [SerializeField] private int shootability; // 射撃スキル
     public int Shootability { get => shootability; }
     [SerializeField] private int slashability; // 斬撃スキル
@@ -22,6 +23,7 @@ public class Pilot : MonoBehaviour
     public enum AIMode
     {
         Simple,    // 単純
+        Tracking,    // 追跡
         Assault,   // 突撃
         Avoidance, // 回避
         Shooting,  // 射撃
@@ -36,43 +38,28 @@ public class Pilot : MonoBehaviour
     private bool isDashing; // ダッシュ中かどうか
     private Vector2 lastDirection = Vector2.zero; // 前回の方向
     private float lastKeyPressTime = 0f; // 前回のキー押下時間
-    private float dashThreshold = 0.25f; // ダッシュ閾値
+    const float DASH_THRESHOLD = 0.25f; // ダッシュ閾値
     private Vector2 currentDirection; // 現在の入力方向
     private Controller controller; // コントローラ
     private GameManager gameManager; // ゲーム管理
-
-    // コンストラクタ
-    public Pilot(
-        int shootability,
-        int slashability,
-        int acceleration,
-        int luck,
-        int searchCapacity,
-        AIMode aiMode
-    )
-    {
-        this.shootability = shootability;
-        this.slashability = slashability;
-        this.acceleration = acceleration;
-        this.luck = luck;
-        this.searchCapacity = searchCapacity;
-        this.aiMode = aiMode;
-    }
+    const float MACHINE_OFFSET = 0.39f; // Ray射出オフセット
+    const float MIN_DISTANCE = 0.3f; // ノードへの到達みなし距離
+    private DijkstraAlgorithm dijkstra; // 最短経路探索アルゴリズム
+    private Node currentNode; // 現在のノード
+    private Node nextNode; // 次のノード
 
     void Start()
     {
         // 必要な他コンポーネント取得
-        gameManager = GameObject.Find("EventSystem").GetComponent<GameManager>();
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         controller = GameObject.Find("EventSystem").GetComponent<Controller>();
+        dijkstra = GameObject.Find("MapManager").GetComponent<DijkstraAlgorithm>();
         machine = gameObject.transform.parent.Find("Machine").GetComponent<Machine>();
         unit = gameObject.transform.parent.GetComponent<Unit>();
 
         // マシンにパイロット情報を渡す
         machine.SetPilot(GetComponent<Pilot>());
 
-        // メタ情報の初期化
-        lastKeyPressTime = 0f;
-        dashThreshold = 0.25f;
     }
 
     void Update()
@@ -109,19 +96,22 @@ public class Pilot : MonoBehaviour
     // CPU操作
     Vector2 CpuInput()
     {
-        if (aiMode == AIMode.Simple)
+        switch (aiMode)
         {
-            return CpuSimple();
+            case AIMode.Simple:
+                return CpuSimple();
+            case AIMode.Tracking:
+                return CpuTracking();
+            default:
+                return Vector2.zero;
         }
-
-        return Vector2.zero;
    }
 
     // 方向キー2度押し判定
     bool IsDoubleTap()
     {
         currentDirection = currentDirection.normalized;
-        bool doubleTap = Time.time - lastKeyPressTime < dashThreshold;
+        bool doubleTap = Time.time - lastKeyPressTime < DASH_THRESHOLD;
         bool isSameDirection = currentDirection == lastDirection;
 
         if (doubleTap && isSameDirection)
@@ -182,7 +172,8 @@ public class Pilot : MonoBehaviour
         if (controller.ShootPhase == InputActionPhase.Started)
         {
             controller.SetShootPhase(InputActionPhase.Performed);
-            GameObject target = SearchTarget(searchCapacity);
+            string targetTag = transform.parent.tag =="Blue" ? "Red" : "Blue";
+            GameObject target = SearchTarget(searchCapacity, targetTag, gameObject);
             StartCoroutine(machine.Shoot(target, currentDirection));
         }
     }
@@ -214,7 +205,7 @@ public class Pilot : MonoBehaviour
     }
 
     // 索敵
-    GameObject SearchTarget(int searchCapacity)
+    public GameObject SearchTarget(int searchCapacity, string searchTag, GameObject searchObject)
     {
         // 索敵範囲
         float searchRange = Calculator.Instance.CalculateSearchRange(searchCapacity);
@@ -225,38 +216,27 @@ public class Pilot : MonoBehaviour
             return null;
         }
 
-        // 自身のタグを確認し、敵のタグのオブジェクトを取得する
-        string allyTag = gameObject.transform.parent.tag;
-        string enemyTag;
-        if (allyTag == "Blue")
-        {
-            enemyTag = "Red";
-        }
-        else
-        {
-            enemyTag = "Blue";
-        }
-
-        // 一番近い敵にターゲットを切り替える
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag(enemyTag);
+        // 一番近いターゲットを切り替える
+        GameObject[] targets = GameObject.FindGameObjectsWithTag(searchTag);
 
         float nearest = 999f;
         GameObject nearestObject = null;
-        Vector2 myPosition = gameObject.transform.position;
-        foreach (GameObject enemy in enemies)
+        Vector2 searchPosition = searchObject.transform.position;
+        foreach (GameObject target in targets)
         {
-            Vector2 enemyPosition = enemy.transform.position;
-            float distance = Vector2.Distance(enemyPosition, myPosition);
+            Vector2 targetPosition = target.transform.position;
+            float distance = Vector2.Distance(targetPosition, searchPosition);
             if (distance < nearest && distance <= searchRange)
             {
                 // 最短距離更新
                 nearest = distance;
-                nearestObject = enemy;
+                nearestObject = target;
             }
         }
         return nearestObject;
     }
 
+    // 単純なCPU
     Vector2 CpuSimple()
     {
         // 相手と自分の距離を求める
@@ -274,7 +254,8 @@ public class Pilot : MonoBehaviour
         {
             // 少し動く
             myPosition = gameObject.transform.position;
-            GameObject target = SearchTarget(searchCapacity);
+            string targetTag = transform.parent.tag =="Blue" ? "Red" : "Blue";
+            GameObject target = SearchTarget(searchCapacity, targetTag, gameObject);
             if (target != null)
             {
                 yourPosition = target.transform.position;
@@ -292,7 +273,8 @@ public class Pilot : MonoBehaviour
         {
             // 少し動く
             myPosition = gameObject.transform.position;
-            GameObject target = SearchTarget(searchCapacity);
+            string targetTag = transform.parent.tag =="Blue" ? "Red" : "Blue";
+            GameObject target = SearchTarget(searchCapacity, targetTag, gameObject);
             if (target != null)
             {
                 yourPosition = target.transform.position;
@@ -303,7 +285,8 @@ public class Pilot : MonoBehaviour
         else
         {
             myPosition = gameObject.transform.position;
-            GameObject target = SearchTarget(searchCapacity);
+            string targetTag = transform.parent.tag =="Blue" ? "Red" : "Blue";
+            GameObject target = SearchTarget(searchCapacity, targetTag, gameObject);
             if (target != null)
             {
                 yourPosition = target.transform.position;
@@ -316,7 +299,7 @@ public class Pilot : MonoBehaviour
                 else
                 {
                     // 離れている場合射撃
-                    target = SearchTarget(searchCapacity);
+                    target = SearchTarget(searchCapacity, targetTag, gameObject);
                     yourPosition = target.transform.position;
                     cpuDirection = yourPosition - myPosition;
                     StartCoroutine(machine.Shoot(target, cpuDirection));
@@ -324,6 +307,74 @@ public class Pilot : MonoBehaviour
             }
 
             cpuPhaseTime = 0f;
+        }
+
+        return cpuDirection;
+    }
+
+    // 追跡するCPU
+    Vector2 CpuTracking()
+    {
+        // 動く
+        Vector2 myPosition = gameObject.transform.position;
+        string targetTag = transform.parent.tag == "Blue" ? "Red" : "Blue";
+        GameObject target = SearchTarget(searchCapacity, targetTag, gameObject);
+        if (target != null)
+        {
+            // ターゲットが見える場合
+            // 索敵範囲
+            float searchRange = Calculator.Instance.CalculateSearchRange(searchCapacity);
+
+            // ターゲットの位置を把握し自分が動いていなかったら方角を決める
+            Vector2 yourPosition = target.transform.position;
+            // if (cpuDirection == Vector2.zero || cpuDirection == null)
+            // {
+            //     cpuDirection = yourPosition - myPosition;
+            // }
+
+            // レイキャストを使用して前方に障害物があるか判定
+            Vector2 targetDirection = yourPosition - myPosition;
+            Vector2 rayStartPosition = new Vector2(transform.position.x + targetDirection.normalized.x * MACHINE_OFFSET, transform.position.y + targetDirection.normalized.y * MACHINE_OFFSET);
+            RaycastHit2D hit = Physics2D.Raycast(rayStartPosition, targetDirection, searchRange - MACHINE_OFFSET);
+            Debug.DrawLine(rayStartPosition, hit.point, Color.red);
+
+            if (hit.collider != null && hit.collider.CompareTag("Wall"))
+            {
+                // 障害物がある場合、ネットワーク沿いに移動
+                
+                GameObject myNearestNodeObject = SearchTarget(searchCapacity, "Node", gameObject);
+                Node myNearestNode = myNearestNodeObject.GetComponent<Node>();
+                Node targetNearestNode = SearchTarget(searchCapacity, "Node", target).GetComponent<Node>();
+                Vector2 myNearestNodePosition = myNearestNodeObject.transform.position;
+
+                if (currentNode == null)
+                {
+                    // ネットワーク上にいない場合は一番近いノードに向かう
+                    nextNode = myNearestNode;
+                }
+
+                if (Vector2.Distance(myNearestNodePosition, myPosition) < MIN_DISTANCE && currentNode != myNearestNode)
+                {
+                    // 一番近いノードに到達したら次のノードに向かう
+                    // 現在のノードを更新する
+                    currentNode = myNearestNode;
+                    nextNode = dijkstra.FindShortestPath(currentNode, targetNearestNode);
+                }
+                
+                cpuDirection = (Vector2)nextNode.transform.position - myPosition;
+            }
+            else
+            {
+                // 障害物がない場合、ターゲットを追跡
+                cpuDirection = yourPosition - myPosition;
+                currentNode = null;
+            }
+        }
+        else
+        {
+            // ターゲットが見えない場合動かない
+            cpuDirection = Vector2.zero;
+            currentNode = null;
         }
 
         return cpuDirection;

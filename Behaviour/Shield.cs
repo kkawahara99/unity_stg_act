@@ -1,15 +1,14 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Shield : MonoBehaviour
 {
     [SerializeField]
-    private int hitPoint = 20; // HP
+    private int hitPoint; // HP
     [SerializeField]
-    private int def = 10; // 装甲
+    private int def; // 装甲
     [SerializeField]
-    private float comeBackTime = 0.2f; // ダウン復帰時間
+    const float COME_BACK_TIME = 0.2f; // ダウン復帰時間
     [SerializeField]
     private GameObject explosionPrefab; // 爆風プレハブ
     [SerializeField]
@@ -73,15 +72,14 @@ public class Shield : MonoBehaviour
     IEnumerator ComeBackFromDown()
     {
         isDown = true;
-        StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, comeBackTime));
+        StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, COME_BACK_TIME, isDown));
 
-        while (isDown)
+        do
         {
-            // CommonのisDownがfalseになったとき
-            // こっちのisDownもfalseにする
-            if (!Common.Instance.IsDown) isDown = false;
+            // コライダーが有効になったときisDownをfalseにする
+            if (gameObject.GetComponent<Collider2D>().enabled) isDown = false;
             yield return null;
-        }
+        } while (isDown);
     }
 
     // HPを減らす
@@ -102,7 +100,7 @@ public class Shield : MonoBehaviour
     IEnumerator Crush()
     {
         // しばらくウェイト
-        yield return new WaitForSeconds(comeBackTime);
+        yield return new WaitForSeconds(COME_BACK_TIME);
 
         // 爆風を生成
         GameObject explosionObject = Instantiate(explosionPrefab, gameObject.transform.position, Quaternion.identity);
