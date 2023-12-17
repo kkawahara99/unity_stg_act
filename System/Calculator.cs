@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Calculator : MonoBehaviour
 {
-    const float BOUNCE_FACTOR = 1.2f; // 反発係数
+    const float BOUNCE_FACTOR = 1.1f; // 反発係数
 
     public static Calculator Instance { get; private set; }
 

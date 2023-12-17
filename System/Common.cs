@@ -93,9 +93,13 @@ public class Common : MonoBehaviour
         }
 
         // 跳ね返りベクトルは一定値以上にならないようにする
-        Vector2 maxVelocity = Calculator.Instance.calculateBounceVelocity(Calculator.Instance.calculateTargetVelocity(Vector2.one.normalized, spd, false));
-        result.x = Mathf.Min(result.x, maxVelocity.x);
-        result.y = Mathf.Min(result.y, maxVelocity.y);
+        Vector2 maxVelocity = Calculator.Instance.calculateBounceVelocity(
+            Calculator.Instance.calculateTargetVelocity(
+                Vector2.one.normalized, spd, false
+            )
+        );
+        result.x = Mathf.Clamp(result.x, -maxVelocity.x, maxVelocity.x);
+        result.y = Mathf.Clamp(result.y, -maxVelocity.y, maxVelocity.y);
 
         return result;
     }
@@ -261,6 +265,20 @@ public class Common : MonoBehaviour
             }
         }
 
+        return null;
+    }
+
+    // オブジェクト名を指定してGameObjectを検索するメソッド
+    public GameObject FindObjectByName(List<GameObject> objectList, string name)
+    {
+        foreach (GameObject obj in objectList)
+        {
+            if (obj.name == name)
+            {
+                return obj;
+            }
+        }
+        // 見つからなかった場合はnullを返します
         return null;
     }
 }

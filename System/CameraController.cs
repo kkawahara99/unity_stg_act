@@ -4,22 +4,32 @@ public class CameraController : MonoBehaviour
 {
     const float CAMERA_TRACKING_SPEED = 1.0f;
     private Camera mainCamera;
+    private Unit trackingUnit; // 追跡するユニット
+    private GameManager gameManager; // ゲーム管理
 
     void Awake()
     {
         // メインカメラ取得
         mainCamera = Camera.main;
     }
+
+    void Start()
+    {
+        // 必要な他コンポーネント取得
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+    }
+
     void Update()
     {
+        // ポーズ中はカメラ移動停止する
+        if (gameManager.IsPaused) return;
+
         trackingPlayer(true);
     }
 
-    public void trackingPlayer(bool isLerp)
+    public void SetUnit()
     {
         // isCpuがfalseのユニットを追跡する（仮）
-        Vector2 charaPosition = transform.position;
-        int searchCapacity = 10;
         Unit[] units = FindObjectsOfType<Unit>();
         foreach (Unit unit in units)
         {
@@ -27,15 +37,19 @@ public class CameraController : MonoBehaviour
             {
                 if (!unit.IsCpu)
                 {
-                    // ユニットポジションを取得
-                    charaPosition = unit.transform.position;
-
-                    // ユニットの索敵能力を取得
-                    searchCapacity = unit.transform.Find("Pilot").GetComponent<Pilot>().SearchCapacity;
+                    trackingUnit = unit;
                     break;
                 }
             }
         }
+    }
+
+    public void trackingPlayer(bool isLerp)
+    {
+        // isCpuがfalseのユニットを追跡する（仮）
+        Vector2 charaPosition = trackingUnit.transform.position;
+        int searchCapacity = trackingUnit.transform.Find("Pilot").GetComponent<Pilot>().SearchCapacity;
+
         // カメラ位置変更
         Vector3 targetPosition = new Vector3(charaPosition.x, charaPosition.y, -10);
         if (isLerp)

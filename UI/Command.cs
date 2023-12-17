@@ -1,9 +1,10 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class Command : MonoBehaviour
 {
-    [SerializeField] private string distinationScene; // 遷移先のシーン
+    [SerializeField] private string distination; // 遷移先
     [SerializeField] private EventType eventType; // イベントタイプ
     [SerializeField] private bool isNextStage; // ステージ進めるか
     [SerializeField] private bool isInit; // ゲーム初期化するか（タイトルではじめから）
@@ -11,20 +12,21 @@ public class Command : MonoBehaviour
     public enum EventType
     {
         Transition,  // 別シーンへ遷移
-        SmallScreen, // 小画面を表示
+        SwitchMenu, // 画面切り替え
         Quit,        // ゲームをやめる
         Other,       // その他（ToDo）
     }
 
     // コマンドのイベント
-    public void CommandEvent()
+    public void CommandEvent(GameObject menuObject)
     {
         switch (eventType)
         {
             case EventType.Transition:
                 TransitionAnotherScene();
                 break;
-            case EventType.SmallScreen:
+            case EventType.SwitchMenu:
+                SwitchMenu(menuObject);
                 break;
             case EventType.Quit:
                 Quit();
@@ -43,7 +45,25 @@ public class Command : MonoBehaviour
         //　
         if (isInit) DataManager.Instance.currentStageNo = 0;
 
-        SceneManager.LoadScene(distinationScene);
+        SceneManager.LoadScene(distination);
+    }
+
+    // メニュー切り替え
+    void SwitchMenu(GameObject menuObject)
+    {
+        // 現メニュー
+        Menu currentMenu = menuObject.GetComponent<Menu>();
+
+        // 新メニュー生成
+        List<GameObject> menuPrefabs = currentMenu.MenuPrefabs;
+        Debug.Log(menuPrefabs);
+        GameObject menuPrefab = Common.Instance.FindObjectByName(menuPrefabs, distination);
+        Debug.Log(menuPrefab);
+        Instantiate(menuPrefab, menuObject.transform.parent);
+        Debug.Log("新メニュー");
+
+        // 現メニュー非活性
+        Destroy(menuObject);
     }
 
     // ゲームをやめる

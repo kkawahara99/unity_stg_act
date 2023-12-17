@@ -14,6 +14,7 @@ public class Menu : MonoBehaviour
 
     [SerializeField] private GameObject cursorIconPrefab; // カーソルアイコン
     [SerializeField] private List<GameObject> menuPrefabs; // Menuプレハブ
+    public List<GameObject> MenuPrefabs { get => menuPrefabs; }
 
     private void Start()
     {
@@ -74,7 +75,7 @@ public class Menu : MonoBehaviour
         SoundManager.Instance.PlaySE(SESoundData.SE.Submit);
 
         // 選択したボタンのイベントを実行する
-        currentSelected.GetComponent<Command>().CommandEvent();
+        currentSelected.GetComponent<Command>().CommandEvent(gameObject);
 
         // GameObject newMenuObject = Instantiate(menuPrefabs[n], transform.parent);
 

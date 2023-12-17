@@ -30,10 +30,10 @@ public class MapManager : MonoBehaviour
     void displayBorders()
     {
         // ボーダーの位置設定
-        Vector2 upBorderPosition = new Vector2(maxX + minX, maxY + BORDER_OFFSET);
-        Vector2 downBorderPosition = new Vector2(maxX + minX, minY - BORDER_OFFSET);
-        Vector2 rightBorderPosition = new Vector2(maxX + BORDER_OFFSET, maxY + minY);
-        Vector2 leftBorderPosition = new Vector2(minX - BORDER_OFFSET, maxY + minY);
+        Vector2 upBorderPosition = new Vector2((maxX + minX) / 2, maxY + BORDER_OFFSET);
+        Vector2 downBorderPosition = new Vector2((maxX + minX) / 2, minY - BORDER_OFFSET);
+        Vector2 rightBorderPosition = new Vector2(maxX + BORDER_OFFSET, (maxY + minY) / 2);
+        Vector2 leftBorderPosition = new Vector2(minX - BORDER_OFFSET, (maxY + minY) / 2);
 
         // ボーダー表示
         GameObject upBorderObject = Instantiate(borderPrefab, upBorderPosition, Quaternion.identity, gameObject.transform);

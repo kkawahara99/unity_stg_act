@@ -42,7 +42,7 @@ public class Pilot : MonoBehaviour
     private Vector2 currentDirection; // 現在の入力方向
     private Controller controller; // コントローラ
     private GameManager gameManager; // ゲーム管理
-    const float MACHINE_OFFSET = 0.35f; // マシンの半径
+    const float MACHINE_OFFSET = 0.39f; // Ray射出オフセット
     const float MIN_DISTANCE = 0.3f; // ノードへの到達みなし距離
     private DijkstraAlgorithm dijkstra; // 最短経路探索アルゴリズム
     private Node currentNode; // 現在のノード
@@ -336,6 +336,7 @@ public class Pilot : MonoBehaviour
             Vector2 targetDirection = yourPosition - myPosition;
             Vector2 rayStartPosition = new Vector2(transform.position.x + targetDirection.normalized.x * MACHINE_OFFSET, transform.position.y + targetDirection.normalized.y * MACHINE_OFFSET);
             RaycastHit2D hit = Physics2D.Raycast(rayStartPosition, targetDirection, searchRange - MACHINE_OFFSET);
+            Debug.DrawLine(rayStartPosition, hit.point, Color.red);
 
             if (hit.collider != null && hit.collider.CompareTag("Wall"))
             {

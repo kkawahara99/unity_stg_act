@@ -15,10 +15,6 @@ public class Unit : MonoBehaviour
     [SerializeField] private Color color; // カラー
     public Color Color { get => color; }
 
-    void Start()
-    {
-    }
-
     // マシンをセット
     public void SetMachinePrefab(GameObject machinePrefab)
     {

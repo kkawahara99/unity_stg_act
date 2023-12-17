@@ -51,7 +51,9 @@ public class Station : MonoBehaviour
             DeployUnits(unitPosition);
 
             // プレイヤーにカメラを合わせる
-            GameObject.Find("Main Camera").GetComponent<CameraController>().trackingPlayer(false);
+            CameraController cameraController = GameObject.Find("Main Camera").GetComponent<CameraController>();
+            cameraController.SetUnit();
+            cameraController.trackingPlayer(false);
         }
     }
 
