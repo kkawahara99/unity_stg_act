@@ -28,6 +28,11 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    void Start()
+    {
+        Pause();
+    }
+
     void Update()
     {
         OnStart();

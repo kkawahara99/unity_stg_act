@@ -208,6 +208,14 @@ public class Common : MonoBehaviour
         downObject.GetComponent<Collider2D>().enabled = true;
     }
 
+    // 増やした後のHPを返す
+    public int IncreaseHP(int maxHp, int currentHP, int recoveryValue)
+    {
+        // 現在HPを増やす
+        // 最大HP以上にならないようにする
+        return Mathf.Min(currentHP + recoveryValue, maxHp);
+    }
+
     // 減らした後のHPを返す
     public int DecreaseHP(int currentHP, int damageValue)
     {

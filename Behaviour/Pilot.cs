@@ -23,12 +23,13 @@ public class Pilot : MonoBehaviour
     public enum AIMode
     {
         Simple,    // 単純
-        Tracking,    // 追跡
+        Freedom,    // 自由
+        Tracking,  // 追跡
         Assault,   // 突撃
         Avoidance, // 回避
         Shooting,  // 射撃
         Balance,   // バランス
-        Defence    // 防衛
+        Defense    // 防衛
     }
 
     private Vector2 cpuDirection; // CPUの移動方向
@@ -100,6 +101,8 @@ public class Pilot : MonoBehaviour
         {
             case AIMode.Simple:
                 return CpuSimple();
+            case AIMode.Freedom:
+                return CpuFreedom();
             case AIMode.Tracking:
                 return CpuTracking();
             default:
@@ -307,6 +310,66 @@ public class Pilot : MonoBehaviour
             }
 
             cpuPhaseTime = 0f;
+        }
+
+        return cpuDirection;
+    }
+
+    // 自由なCPU
+    Vector2 CpuFreedom()
+    {
+        // 動く
+        Vector2 myPosition = gameObject.transform.position;
+        string targetTag = transform.parent.tag == "Blue" ? "Red" : "Blue";
+        GameObject target = SearchTarget(searchCapacity, targetTag, gameObject);
+        if (target != null)
+        {
+            // ターゲットが見える場合
+            Vector2 yourPosition = target.transform.position;
+            if (cpuPhaseTime == 0f)
+            {
+                cpuDirection = yourPosition - myPosition;
+                cpuPhaseTime += Time.deltaTime;
+            }
+            else if (cpuPhaseTime < 0.1f)
+            {
+                cpuPhaseTime += Time.deltaTime;
+            }
+            else if (cpuPhaseTime >= 0.1f)
+            {
+                // 攻撃
+                float distanceX = yourPosition.x - myPosition.x;
+                float distanceY = yourPosition.y - myPosition.y;
+                if (Mathf.Abs(distanceX) < 0.7f && Mathf.Abs(distanceY) < 0.3f)
+                {
+                    // 近距離の場合斬撃
+                    StartCoroutine(machine.Slash());
+                }
+                else
+                {
+                    // 離れている時射撃
+                    StartCoroutine(machine.Shoot(target, cpuDirection));
+                }
+                cpuPhaseTime = 0f;
+            }
+        }
+        else
+        {
+            // ターゲットが見えない場合ランダムに動く
+            if (cpuPhaseTime == 0f)
+            {
+                // 向きを変更
+                cpuDirection = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f));
+                cpuPhaseTime += Time.deltaTime;
+            }
+            else if (cpuPhaseTime > 0.5f)
+            {
+                cpuPhaseTime = 0f;
+            }
+            else
+            {
+                cpuPhaseTime += Time.deltaTime;
+            }
         }
 
         return cpuDirection;

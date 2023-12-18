@@ -39,7 +39,7 @@ public class ChargeUI : MonoBehaviour
     }
 
     // ゲージ表示・非表示
-    void ShowUI(bool isShow)
+    public void ShowUI(bool isShow)
     {
         slider.transform.Find("Background").gameObject.SetActive(isShow);
         slider.transform.Find("FillArea").gameObject.SetActive(isShow);

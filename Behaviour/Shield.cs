@@ -24,6 +24,7 @@ public class Shield : MonoBehaviour
     public int HitPoint { get => hitPoint; }
     public int Def { get => def; }
     public Vector2 EquipmentPosition { get => equipmentPosition; }
+    private bool isDead;
 
     void Start()
     {
@@ -90,8 +91,9 @@ public class Shield : MonoBehaviour
         currentHP = Mathf.Max(currentHP - damageValue, 0);
 
         // 0のときクラッシュする
-        if (currentHP == 0)
+        if (currentHP == 0 && !isDead)
         {
+            isDead = true;
             StartCoroutine(Crush());
         }
     }

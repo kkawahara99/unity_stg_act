@@ -43,6 +43,7 @@ public class Machine : MonoBehaviour
     private Shield shield; // シールド情報
     private MapManager mapManager; // マップ情報
     private Pilot pilot;
+    private bool isDead;
 
     void Start()
     {
@@ -85,8 +86,9 @@ public class Machine : MonoBehaviour
     void Update()
     {
         // 0のときクラッシュする
-        if (currentHP == 0)
+        if (currentHP == 0 && !isDead)
         {
+            isDead = true;
             StartCoroutine(Crush());
         }
     }
@@ -189,11 +191,31 @@ public class Machine : MonoBehaviour
         }
     }
 
+    // HPを回復する
+    public void RecoverHP(int recoveryValue)
+    {
+        // 全快のときはreturn
+        if (hitPoint == currentHP) return;
+
+        // HPを増やす
+        currentHP = Common.Instance.IncreaseHP(hitPoint, currentHP, recoveryValue);
+
+        // HPゲージ更新
+        UpdateHPUI();
+
+    }
+
     // HPゲージ更新
     void UpdateHPUI()
     {
         ChargeUI chargeUI = gameObject.transform.parent.Find("ParamUI").Find("HPGauge").GetComponent<ChargeUI>();
         chargeUI.UpdateChargeUI(currentHP, hitPoint);
+
+        if (hitPoint == currentHP)
+        {
+            // HPがMAXの時はゲージを隠す
+            chargeUI.ShowUI(false);
+        }
     }
 
     // クラッシュする

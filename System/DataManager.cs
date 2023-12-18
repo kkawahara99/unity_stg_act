@@ -6,6 +6,8 @@ public class DataManager : MonoBehaviour
 
     public Station station;
     public int currentStageNo; // 現在のステージNo
+    public int coinCount; // 所持コイン数
+    public Elements elements; // 所持エレメント
 
     private void Awake()
     {

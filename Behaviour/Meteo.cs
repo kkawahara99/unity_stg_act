@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Meteo : MonoBehaviour
@@ -11,10 +12,13 @@ public class Meteo : MonoBehaviour
     private int luck = 0; // 運
     [SerializeField]
     const float COMEBACK_TIME = 0.2f; // ダウン復帰時間
+    const float ITEM_WAIT_TIME = 0.5f; // アイテム待機時間
     [SerializeField]
     private GameObject explosionPrefab; // 爆風プレハブ
     [SerializeField]
     private MeteoType meteoTypte; // 隕石のタイプ
+    [SerializeField]
+    private List<ItemBean> dropItem = new List<ItemBean>(); // ドロップアイテム
 
     public enum MeteoType
     {
@@ -29,6 +33,7 @@ public class Meteo : MonoBehaviour
     public int HitPoint { get => hitPoint; }
 
     private Rigidbody2D rb;
+    private bool isDead;
 
     void Start()
     {
@@ -42,8 +47,9 @@ public class Meteo : MonoBehaviour
     void Update()
     {
         // 0のときクラッシュする
-        if (currentHP == 0)
+        if (currentHP == 0 && !isDead)
         {
+            isDead = true;
             StartCoroutine(Crush());
         }
     }
@@ -95,19 +101,6 @@ public class Meteo : MonoBehaviour
         } while (isDown);
     }
 
-    // HPを減らす
-    void DecreaseHP(int damageValue)
-    {
-        // 現在HPを減らす
-        // 0以下にならないようにする
-        currentHP = Mathf.Max(currentHP - damageValue, 0);
-
-        // 0のときクラッシュする
-        if (currentHP == 0)
-        {
-            StartCoroutine(Crush());
-        }
-    }
     // クラッシュする
     IEnumerator Crush()
     {
@@ -118,7 +111,39 @@ public class Meteo : MonoBehaviour
         yield return new WaitForSeconds(COMEBACK_TIME);
 
         // 爆風を生成
-        GameObject explosionObject = Instantiate(explosionPrefab, gameObject.transform.position, Quaternion.identity);
+        GameObject explosionObject = Instantiate(explosionPrefab, transform.position, Quaternion.identity);
         explosionObject.transform.localScale = new Vector3(0.6f, 0.6f, 0.6f);
+
+        // アイテム生成
+        ItemBean itemBean = SelectItemBean();
+        Instantiate(itemBean.ItemPrefab, transform.position, Quaternion.identity);
+    }
+
+    // アイテム生成
+    ItemBean SelectItemBean()
+    {
+        int totalFrequency = 0;
+
+        // 出現率の母数を取得
+        foreach (ItemBean itemBean in dropItem)
+        {
+            totalFrequency += itemBean.Frequency;
+        }
+
+        // ランダム値生成
+        int randomValue = Random.Range(0, totalFrequency);
+
+        // 出現率に基づきリストを選択
+        foreach (ItemBean itemBean in dropItem)
+        {
+            if (randomValue <= itemBean.Frequency)
+            {
+                return itemBean;
+            }
+
+            randomValue -= itemBean.Frequency;
+        }
+
+        return null;
     }
 }

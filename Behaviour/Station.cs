@@ -26,6 +26,7 @@ public class Station : MonoBehaviour
     const float COME_BACK_TIME = 0.2f; // ダウン復帰時間
     private bool isDown; // ダウン中かどうか
     private int currentHP; // 現在のHP
+    private bool isDead;
 
     void Start()
     {
@@ -60,8 +61,9 @@ public class Station : MonoBehaviour
     void Update()
     {
         // 0のときクラッシュする
-        if (currentHP == 0)
+        if (currentHP == 0 && !isDead)
         {
+            isDead = true;
             StartCoroutine(Crush());
         }
     }
