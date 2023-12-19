@@ -143,9 +143,6 @@ public class Station : MonoBehaviour
     // クラッシュする
     IEnumerator Crush()
     {
-        // 削除する
-        Destroy(gameObject, COME_BACK_TIME + 0.1f);
-
         // しばらくウェイト
         yield return new WaitForSeconds(COME_BACK_TIME);
 
@@ -158,6 +155,9 @@ public class Station : MonoBehaviour
 
         // 敵軍ステーションの場合クリアToDo
         if (gameObject.tag == "Red") Common.Instance.Succeeded();
+
+        // 削除する
+        Destroy(gameObject);
     }
 
     public void AddUnit(Unit unit)

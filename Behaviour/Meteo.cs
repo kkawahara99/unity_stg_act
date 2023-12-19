@@ -104,9 +104,6 @@ public class Meteo : MonoBehaviour
     // クラッシュする
     IEnumerator Crush()
     {
-        // 削除する
-        Destroy(gameObject, COMEBACK_TIME + 0.1f);
-
         // しばらくウェイト
         yield return new WaitForSeconds(COMEBACK_TIME);
 
@@ -115,35 +112,9 @@ public class Meteo : MonoBehaviour
         explosionObject.transform.localScale = new Vector3(0.6f, 0.6f, 0.6f);
 
         // アイテム生成
-        ItemBean itemBean = SelectItemBean();
-        Instantiate(itemBean.ItemPrefab, transform.position, Quaternion.identity);
-    }
+        Common.Instance.GenerateItem(dropItem, transform);
 
-    // アイテム生成
-    ItemBean SelectItemBean()
-    {
-        int totalFrequency = 0;
-
-        // 出現率の母数を取得
-        foreach (ItemBean itemBean in dropItem)
-        {
-            totalFrequency += itemBean.Frequency;
-        }
-
-        // ランダム値生成
-        int randomValue = Random.Range(0, totalFrequency);
-
-        // 出現率に基づきリストを選択
-        foreach (ItemBean itemBean in dropItem)
-        {
-            if (randomValue <= itemBean.Frequency)
-            {
-                return itemBean;
-            }
-
-            randomValue -= itemBean.Frequency;
-        }
-
-        return null;
+        // 削除する
+        Destroy(gameObject);
     }
 }

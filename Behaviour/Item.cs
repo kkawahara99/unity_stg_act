@@ -43,6 +43,9 @@ public class Item : MonoBehaviour
     void OnTriggerEnter2D(Collider2D collision)
     {
         Transform playerTransform = collision.transform.parent;
+        if (playerTransform == null) return;
+        if (playerTransform.GetComponent<Unit>() == null) return;
+
         bool isPlayer = !playerTransform.GetComponent<Unit>().IsCpu;
         if (isPlayer)
         {
@@ -83,8 +86,8 @@ public class Item : MonoBehaviour
             // 効果音
             SoundManager.Instance.PlaySE(SESoundData.SE.Recover1);
 
-            // 半分回復
-            recoveryValue = machine.HitPoint / 2;
+            // 1/4回復
+            recoveryValue = machine.HitPoint / 4;
         }
 
         // 回復させる

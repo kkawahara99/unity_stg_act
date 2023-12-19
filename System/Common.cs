@@ -289,4 +289,39 @@ public class Common : MonoBehaviour
         // 見つからなかった場合はnullを返します
         return null;
     }
+
+    // アイテム生成
+    public void GenerateItem(List<ItemBean> dropItem, Transform generatorTransform)
+    {
+        ItemBean itemBean = null;
+        int totalFrequency = 0;
+
+        // 出現率の母数を取得
+        foreach (ItemBean item in dropItem)
+        {
+            totalFrequency += item.Frequency;
+        }
+
+        // ランダム値生成
+        Debug.Log(totalFrequency);
+        int randomValue = Random.Range(1, totalFrequency);
+
+        // 出現率に基づきリストを選択
+        foreach (ItemBean item in dropItem)
+        {
+            Debug.Log(randomValue + ":" + item.ItemPrefab + ":" + item.Frequency);
+            if (randomValue <= item.Frequency)
+            {
+                itemBean = item;
+                break;
+            }
+
+            randomValue -= item.Frequency;
+        }
+
+        // ドロップアイテムなしの時はreturn
+        if (itemBean.ItemPrefab == null) return;
+
+        Instantiate(itemBean.ItemPrefab, generatorTransform.position, Quaternion.identity);
+    }
 }

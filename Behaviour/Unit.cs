@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Unit : MonoBehaviour
@@ -14,6 +15,8 @@ public class Unit : MonoBehaviour
     public bool IsRight { get => isRight; }
     [SerializeField] private Color color; // カラー
     public Color Color { get => color; }
+    [SerializeField] private List<ItemBean> dropItem = new List<ItemBean>(); // ドロップアイテム
+    public List<ItemBean> DropItem { get => dropItem; }
 
     // マシンをセット
     public void SetMachinePrefab(GameObject machinePrefab)

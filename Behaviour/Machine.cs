@@ -23,7 +23,6 @@ public class Machine : MonoBehaviour
     public GameObject HandWeaponPrefab { get => handWeaponPrefab; }
     [SerializeField] private GameObject shieldPrefab; // 盾装備
     public GameObject ShieldPrefab { get => shieldPrefab; }
-
     [SerializeField] private GameObject explosionPrefab;
 
     private Unit unit; // パラメータ
@@ -221,9 +220,6 @@ public class Machine : MonoBehaviour
     // クラッシュする
     IEnumerator Crush()
     {
-        // 本体を削除する
-        Destroy(gameObject.transform.parent.gameObject, COMEBACK_TIME + 0.1f);
-
         // しばらくウェイト
         yield return new WaitForSeconds(COMEBACK_TIME);
 
@@ -233,6 +229,12 @@ public class Machine : MonoBehaviour
         // ユキノのときはゲームオーバーToDo
         string pilotName = transform.parent.Find("Pilot").GetComponent<Pilot>().PilotName;
         if (pilotName == "Yukino") Common.Instance.Failed();
+
+        // アイテム生成
+        Common.Instance.GenerateItem(unit.DropItem, transform);
+
+        // 本体を削除する
+        Destroy(gameObject.transform.parent.gameObject);
     }
 
     // ダウン中からの復帰
