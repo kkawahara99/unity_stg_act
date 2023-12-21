@@ -1,5 +1,7 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Networking;
 
 public class GameManager : MonoBehaviour
 {
@@ -10,6 +12,8 @@ public class GameManager : MonoBehaviour
     public bool IsPaused { get => isPaused; }
     private Controller controller; // コントローラ
     private CameraController cameraController; // カメラ
+
+    const string URL = "https://";
 
     void Awake()
     {
@@ -26,6 +30,9 @@ public class GameManager : MonoBehaviour
             GameObject mapObject = Instantiate(stageMapPrefabs[currentStageNo], Vector2.zero, Quaternion.identity);
             mapObject.name = "MapManager";
         }
+
+        // テスト：API実行
+        // StartCoroutine(TestExecuteAPI());
     }
 
     void Start()
@@ -84,5 +91,20 @@ public class GameManager : MonoBehaviour
 
         // 画面前景色を変更
         cameraController.SetForeground(color);
+    }
+
+    IEnumerator TestExecuteAPI()
+    {
+        UnityWebRequest req = UnityWebRequest.Get(URL);
+        yield return req.SendWebRequest();
+
+        if (req.result != UnityWebRequest.Result.Success)
+        {
+            Debug.Log(req.error);
+        }
+        else if (req.responseCode == 200)
+        {
+            Debug.Log(req.downloadHandler.text);
+        }
     }
 }
