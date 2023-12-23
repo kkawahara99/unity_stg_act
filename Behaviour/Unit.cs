@@ -17,6 +17,8 @@ public class Unit : MonoBehaviour
     public Color Color { get => color; }
     [SerializeField] private List<ItemBean> dropItem = new List<ItemBean>(); // ドロップアイテム
     public List<ItemBean> DropItem { get => dropItem; }
+    private int killCount; // 撃破数
+    public int KillCount { get => killCount; }
 
     // マシンをセット
     public void SetMachinePrefab(GameObject machinePrefab)
@@ -48,5 +50,12 @@ public class Unit : MonoBehaviour
     {
         GameObject pilotObject = Instantiate(pilotPrefab, transform.position, Quaternion.identity, transform);
         pilotObject.name = "Pilot";
+    }
+
+    // 撃破数インクリメント
+    public void IncrementKillCount()
+    {
+        this.killCount++;
+        Debug.Log(gameObject.name + "：" + killCount);
     }
 }

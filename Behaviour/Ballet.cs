@@ -9,8 +9,8 @@ public class Ballet : MonoBehaviour
 
     private Rigidbody2D rb;
     private Vector2 currentVelocity;  // 現在の速度
-    private Pilot pilot; 
     private Weapon weapon; 
+    private Pilot pilot; 
     public Pilot Pilot { get => pilot; } 
 
     // 発射された

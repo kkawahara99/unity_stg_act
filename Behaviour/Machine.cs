@@ -41,8 +41,9 @@ public class Machine : MonoBehaviour
     private float currentPP; // 現在の推進力
     private Shield shield; // シールド情報
     private MapManager mapManager; // マップ情報
-    private Pilot pilot;
-    private bool isDead;
+    private Pilot pilot; // パイロット情報
+    private bool isDead; // 死んでるかどうか
+    private Unit _opponentUnit; // ダメージ食らわされた相手ユニット
 
     void Start()
     {
@@ -175,6 +176,20 @@ public class Machine : MonoBehaviour
             int ret = Common.Instance.DecideEvent(contact, def, pilot.Luck);
             if (ret > 0)
             {
+                // 攻撃相手ユニットの情報を取得する
+                Ballet collidedBallet = contact.collider.gameObject.GetComponent<Ballet>();
+                Weapon collidedWeapon = contact.collider.gameObject.GetComponent<Weapon>();
+                if (collidedBallet != null)
+                {
+                    // 弾に被弾した時
+                    _opponentUnit = collidedBallet.Pilot.Unit;
+                }
+                else if (collidedWeapon != null)
+                {
+                    // 武器に被弾したとき
+                    _opponentUnit = collidedWeapon.Pilot.Unit;
+                }
+
                 // 0より大きい場合、ダメージ処理
                 currentHP = Common.Instance.DecreaseHP(currentHP, ret);
 
@@ -229,6 +244,9 @@ public class Machine : MonoBehaviour
         // ユキノのときはゲームオーバーToDo
         string pilotName = transform.parent.Find("Pilot").GetComponent<Pilot>().PilotName;
         if (pilotName == "Yukino") Common.Instance.Failed();
+
+        // 撃破ユニットの撃破数を増やさせる
+        _opponentUnit.IncrementKillCount();
 
         // アイテム生成
         Common.Instance.GenerateItem(unit.DropItem, transform);

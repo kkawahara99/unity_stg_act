@@ -303,13 +303,11 @@ public class Common : MonoBehaviour
         }
 
         // ランダム値生成
-        Debug.Log(totalFrequency);
         int randomValue = Random.Range(1, totalFrequency);
 
         // 出現率に基づきリストを選択
         foreach (ItemBean item in dropItem)
         {
-            Debug.Log(randomValue + ":" + item.ItemPrefab + ":" + item.Frequency);
             if (randomValue <= item.Frequency)
             {
                 itemBean = item;

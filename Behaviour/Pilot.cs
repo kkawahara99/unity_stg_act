@@ -4,8 +4,6 @@ using UnityEngine.InputSystem;
 
 public class Pilot : MonoBehaviour
 {
-    private Unit unit;
-
     [SerializeField] private string pilotName; // パイロット名
     public string PilotName { get => pilotName; }
     [SerializeField] private int shootability; // 射撃スキル
@@ -48,6 +46,8 @@ public class Pilot : MonoBehaviour
     private DijkstraAlgorithm dijkstra; // 最短経路探索アルゴリズム
     private Node currentNode; // 現在のノード
     private Node nextNode; // 次のノード
+    private Unit unit;
+    public Unit Unit { get => unit; }
 
     void Start()
     {
