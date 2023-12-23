@@ -38,6 +38,12 @@ public class Unit : MonoBehaviour
         this.color = color;
     }
 
+    // 位置をセット
+    public void SetPosition(Vector2 position)
+    {
+        transform.position = position;
+    }
+
     // マシンの展開
     public void DeployMachine()
     {

@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 public class Command : MonoBehaviour
 {
     [SerializeField] private string distination; // 遷移先
+    [SerializeField] private ScenarioManager.ScenarioID scenarioID; // シナリオID
     [SerializeField] private EventType eventType; // イベントタイプ
     [SerializeField] private bool isNextStage; // ステージ進めるか
     [SerializeField] private bool isInit; // ゲーム初期化するか（タイトルではじめから）
@@ -43,7 +44,14 @@ public class Command : MonoBehaviour
         if (isNextStage) DataManager.Instance.currentStageNo += 1;
 
         //　
-        if (isInit) DataManager.Instance.currentStageNo = 0;
+        if (isInit)
+        {
+            // 初めからのとき
+            // 現在のステージNoを初期化
+            DataManager.Instance.currentStageNo = 0;
+            // 現在のシナリオを初期化
+            DataManager.Instance.currentScenarioID = scenarioID;
+        }
 
         SceneManager.LoadScene(distination);
     }

@@ -318,7 +318,7 @@ public class Common : MonoBehaviour
         }
 
         // ドロップアイテムなしの時はreturn
-        if (itemBean.ItemPrefab == null) return;
+        if (itemBean == null || itemBean.ItemPrefab == null) return;
 
         Instantiate(itemBean.ItemPrefab, generatorTransform.position, Quaternion.identity);
     }

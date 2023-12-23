@@ -5,6 +5,7 @@ public class DataManager : MonoBehaviour
     public static DataManager Instance { get; private set; }
 
     public Station station;
+    public ScenarioManager.ScenarioID currentScenarioID; // 現在のシナリオ
     public int currentStageNo; // 現在のステージNo
     public int coinCount; // 所持コイン数
     public Elements elements; // 所持エレメント

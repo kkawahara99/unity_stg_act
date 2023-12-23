@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -5,7 +6,7 @@ using UnityEngine.Networking;
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField] private GameObject[] stageMapPrefabs; // ステージマッププレハブ
+    [SerializeField] private List<ScenarioMapping> scenarioMappings; // シナリオマッピングプレハブ
     [SerializeField] private bool isDebug; // デバッグモードかどうか
 
     private bool isPaused = false;
@@ -23,11 +24,15 @@ public class GameManager : MonoBehaviour
 
         if (!isDebug)
         {
+            // 対象のシナリオIDを取得
+            ScenarioManager.ScenarioID scenarioID = DataManager.Instance.currentScenarioID;
+            ScenarioMapping scenarioMapping = scenarioMappings.Find(scenarioMapping => scenarioMapping.scenarioID == scenarioID);
+
             // 対象のステージNoを取得
             int currentStageNo = DataManager.Instance.currentStageNo;
 
             // 対象のステージNoのマップを生成する
-            GameObject mapObject = Instantiate(stageMapPrefabs[currentStageNo], Vector2.zero, Quaternion.identity);
+            GameObject mapObject = Instantiate(scenarioMapping.stageMapPrefabs[currentStageNo], Vector2.zero, Quaternion.identity);
             mapObject.name = "MapManager";
         }
 
@@ -107,4 +112,11 @@ public class GameManager : MonoBehaviour
             Debug.Log(req.downloadHandler.text);
         }
     }
+}
+
+[System.Serializable]
+public class ScenarioMapping
+{
+    public ScenarioManager.ScenarioID scenarioID;
+    public List<GameObject> stageMapPrefabs;
 }

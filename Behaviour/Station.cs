@@ -10,8 +10,7 @@ public class Station : MonoBehaviour
     public int Atc { get => atc; }
     [SerializeField] private int def; // 装甲（Def）
     public int Def { get => def; }
-    [SerializeField]
-    private int luck; // 運
+    [SerializeField] private int luck; // 運
 
     [SerializeField] private GameObject explosionPrefab;
     [SerializeField] private GameObject unitPrefab;
@@ -22,11 +21,13 @@ public class Station : MonoBehaviour
     public List<GameObject> MachineObjects { get => machineObjects; }
     [SerializeField] private List<GameObject> pilotObjects;
     public List<GameObject> PilotObjects { get => pilotObjects; }
+    [SerializeField] private float deployRate; // デプロイHP率
 
     const float COME_BACK_TIME = 0.2f; // ダウン復帰時間
     private bool isDown; // ダウン中かどうか
     private int currentHP; // 現在のHP
     private bool isDead;
+    private bool isDeploy;
 
     void Start()
     {
@@ -49,7 +50,7 @@ public class Station : MonoBehaviour
             AddUnit(unit);
 
             // ユニットを展開する
-            DeployUnits(unitPosition);
+            DeployUnits();
 
             // プレイヤーにカメラを合わせる
             CameraController cameraController = GameObject.Find("Main Camera").GetComponent<CameraController>();
@@ -66,10 +67,30 @@ public class Station : MonoBehaviour
             isDead = true;
             StartCoroutine(Crush());
         }
+
+        if ((float)currentHP / (float)hitPoint <= deployRate && !isDeploy)
+        {
+            isDeploy = true;
+            // 残りHPがデプロイHP率以下の時ユニット展開する
+            GenerateUnit(new Vector2(transform.position.x - 0.5f, transform.position.y));
+            DeployUnits();
+        }
+    }
+
+    // ユニット生成
+    void GenerateUnit(Vector2 position)
+    {
+        GameObject unitObject = Instantiate(unitPrefab, position, Quaternion.identity, transform);
+        Unit unit = unitObject.GetComponent<Unit>();
+        unit.SetMachinePrefab(machineObjects[0]);
+        unit.SetPilotPrefab(pilotObjects[0]);
+        unit.SetColor(new Color(1f, 0.5f, 0.5f, 1f));
+
+        AddUnit(unit);
     }
 
     // ユニットを展開する
-    void DeployUnits(Vector2 position)
+    void DeployUnits()
     {
         foreach (Unit unit in units)
         {
