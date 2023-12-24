@@ -40,7 +40,6 @@ public class Station : MonoBehaviour
         Vector2 unitPosition = new Vector2(transform.position.x + 0.5f, transform.position.y);
         if (gameObject.tag == "Blue")
         {
-            units = new List<Unit>();
             GameObject unitObject = Instantiate(unitPrefab, unitPosition, Quaternion.identity);
             Unit unit = unitObject.GetComponent<Unit>();
             unit.SetMachinePrefab(machineObjects[0]);

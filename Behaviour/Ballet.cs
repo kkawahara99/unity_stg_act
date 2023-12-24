@@ -6,6 +6,7 @@ public class Ballet : MonoBehaviour
     private int power; // 弾の火力
     public int Power { get => power; }
     private bool isEnemy; // 敵の弾かどうか
+    public bool IsEnemy { get => isEnemy; }
 
     private Rigidbody2D rb;
     private Vector2 currentVelocity;  // 現在の速度
@@ -43,6 +44,9 @@ public class Ballet : MonoBehaviour
                 Physics2D.IgnoreCollision(GetComponent<Collider2D>(), obj.GetComponent<Collider2D>());
             }
         }
+
+        // 名前変更
+        gameObject.name = "Ballet";
 
         // しばらくすると消える
         Destroy(this.gameObject, this.weapon.ActiveTime);

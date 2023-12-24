@@ -21,13 +21,14 @@ public class Pilot : MonoBehaviour
     public enum AIMode
     {
         Simple,    // 単純
-        Freedom,    // 自由
+        Freedom,   // 自由
         Tracking,  // 追跡
         Assault,   // 突撃
         Avoidance, // 回避
         Shooting,  // 射撃
         Balance,   // バランス
-        Defense    // 防衛
+        Defense,   // 防衛
+        Follow,   // 追従
     }
 
     private Vector2 cpuDirection; // CPUの移動方向
@@ -105,6 +106,10 @@ public class Pilot : MonoBehaviour
                 return CpuFreedom();
             case AIMode.Tracking:
                 return CpuTracking();
+            case AIMode.Balance:
+                return CpuBalance();
+            case AIMode.Follow:
+                return CpuFollow();
             default:
                 return Vector2.zero;
         }
@@ -144,7 +149,7 @@ public class Pilot : MonoBehaviour
             // ブーストさせる
             machine.BoostBehaviour(true);
 
-            if ((isDoubleTap || isDashing) && !unit.IsCpu)
+            if (isDoubleTap || isDashing)
             {
                 // ダッシュ状態へ
                 isDashing = true;
@@ -239,77 +244,178 @@ public class Pilot : MonoBehaviour
         return nearestObject;
     }
 
+    // 弾の検知
+    public GameObject SearchBallet(int searchCapacity, string searchTag, GameObject searchObject)
+    {
+        // 索敵範囲
+        float searchRange = Calculator.Instance.CalculateSearchRange(searchCapacity);
+
+        // 一番近いターゲットを切り替える
+        GameObject[] targets = GameObject.FindGameObjectsWithTag(searchTag);
+
+        float nearest = 999f;
+        GameObject nearestObject = null;
+        Vector2 searchPosition = searchObject.transform.position;
+        foreach (GameObject target in targets)
+        {
+            Vector2 targetPosition = target.transform.position;
+            float distance = Vector2.Distance(targetPosition, searchPosition);
+
+            // ターゲットの弾が敵のものかどうか
+            bool isEnemy = transform.parent.tag == "Blue" ? target.GetComponent<Ballet>().IsEnemy : !target.GetComponent<Ballet>().IsEnemy;
+            if (distance < nearest && distance <= searchRange && isEnemy)
+            {
+                // 最短距離更新
+                nearest = distance;
+                nearestObject = target;
+            }
+        }
+        return nearestObject;
+    }
+
+    // 追従
+    public GameObject SearchAlly(int searchCapacity, string searchTag, GameObject searchObject)
+    {
+        // 索敵範囲
+        float searchRange = Calculator.Instance.CalculateSearchRange(searchCapacity);
+
+        // 一番近いターゲットを切り替える
+        GameObject[] targets = GameObject.FindGameObjectsWithTag(searchTag);
+
+        float nearest = 999f;
+        GameObject nearestObject = null;
+        Vector2 searchPosition = searchObject.transform.position;
+        foreach (GameObject target in targets)
+        {
+            Vector2 targetPosition = target.transform.position;
+            float distance = Vector2.Distance(targetPosition, searchPosition);
+            if (distance < nearest && distance <= searchRange)
+            {
+                // ステーションと自身は除外
+                if (target.GetComponent<Unit>() != null && distance != 0f)
+                {
+                    // 最短距離更新
+                    nearest = distance;
+                    nearestObject = target;
+                }
+            }
+        }
+        return nearestObject;
+    }
+
+    // CPU行動モジュール
+    // 停止する
+    void Stop()
+    {
+        cpuDirection = Vector2.zero;
+        cpuPhaseTime += Time.deltaTime;
+    }
+    // 近づく
+    void Approach(Vector2 yourPosition, Vector2 myPosition)
+    {
+        cpuDirection = yourPosition - myPosition;
+        cpuPhaseTime += Time.deltaTime;
+    }
+    // 離れる
+    void Leave(Vector2 yourPosition, Vector2 myPosition)
+    {
+        cpuDirection = myPosition - yourPosition;
+        cpuPhaseTime += Time.deltaTime;
+    }
+    // ランダムに動く
+    void MoveRandom()
+    {
+        cpuDirection = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f));
+        cpuPhaseTime += Time.deltaTime;
+    }
+    // 攻撃する
+    void Attack(Vector2 yourPosition, Vector2 myPosition, GameObject target)
+    {
+        float distanceX = yourPosition.x - myPosition.x;
+        float distanceY = yourPosition.y - myPosition.y;
+        if (Mathf.Abs(distanceX) < 0.7f && Mathf.Abs(distanceY) < 0.3f)
+        {
+            // 近距離の場合斬撃
+            StartCoroutine(machine.Slash());
+        }
+        else
+        {
+            // 離れている時射撃
+            StartCoroutine(machine.Shoot(target, cpuDirection));
+        }
+
+        cpuPhaseTime += Time.deltaTime;
+    }
+    // 防御する
+    void Defense()
+    {
+        StartCoroutine(machine.Defence());
+        cpuPhaseTime += Time.deltaTime;
+    }
+    // 探索する
+    void Explore(Vector2 myPosition, GameObject target)
+    {
+        // 障害物がある場合、ネットワーク沿いに移動
+        GameObject myNearestNodeObject = SearchTarget(searchCapacity, "Node", gameObject);
+        Node myNearestNode = myNearestNodeObject.GetComponent<Node>();
+        Node targetNearestNode = SearchTarget(searchCapacity, "Node", target).GetComponent<Node>();
+        Vector2 myNearestNodePosition = myNearestNodeObject.transform.position;
+
+        if (currentNode == null)
+        {
+            // ネットワーク上にいない場合は一番近いノードに向かう
+            nextNode = myNearestNode;
+        }
+
+        if (Vector2.Distance(myNearestNodePosition, myPosition) < MIN_DISTANCE && currentNode != myNearestNode)
+        {
+            // 一番近いノードに到達したら次のノードに向かう
+            // 現在のノードを更新する
+            currentNode = myNearestNode;
+            nextNode = dijkstra.FindShortestPath(currentNode, targetNearestNode);
+        }
+        
+        cpuDirection = (Vector2)nextNode.transform.position - myPosition;
+    }
+
     // 単純なCPU
     Vector2 CpuSimple()
     {
         // 相手と自分の距離を求める
-        Vector2 myPosition = Vector2.zero;
-        Vector2 yourPosition = Vector2.zero;
-        float distance;
+        Vector2 myPosition = gameObject.transform.position;
+        string targetTag = transform.parent.tag =="Blue" ? "Red" : "Blue";
+        GameObject target = SearchTarget(searchCapacity, targetTag, gameObject);
+        if (target != null)
+        {
+            Vector2 yourPosition = target.transform.position;
+            if (cpuPhaseTime < 0.5f)
+            {
+                // 少し止まる
+                Stop();
+            }
+            else if (cpuPhaseTime < 1.5f)
+            {
+                // 少し動く
+                Approach(yourPosition, myPosition);
+            }
+            else if (cpuPhaseTime < 2.0f)
+            {
+                // 少し止まる
+                Stop();
+            }
+            else if (cpuPhaseTime < 2.5f)
+            {
+                // 少し動く
+                Approach(yourPosition, myPosition);
+            }
+            else
+            {
+                // 攻撃
+                Attack(yourPosition, myPosition, target);
 
-        if (cpuPhaseTime < 0.5f)
-        {
-            // 少し止まる
-            cpuDirection = Vector2.zero;
-            cpuPhaseTime += Time.deltaTime;
-        }
-        else if (cpuPhaseTime < 1.5f)
-        {
-            // 少し動く
-            myPosition = gameObject.transform.position;
-            string targetTag = transform.parent.tag =="Blue" ? "Red" : "Blue";
-            GameObject target = SearchTarget(searchCapacity, targetTag, gameObject);
-            if (target != null)
-            {
-                yourPosition = target.transform.position;
-                cpuDirection = yourPosition - myPosition;
+                // 行動パターンをリセット
+                cpuPhaseTime = 0;
             }
-            cpuPhaseTime += Time.deltaTime;
-        }
-        else if (cpuPhaseTime < 2.0f)
-        {
-            // 少し止まる
-            cpuDirection = Vector2.zero;
-            cpuPhaseTime += Time.deltaTime;
-        }
-        else if (cpuPhaseTime < 2.5f)
-        {
-            // 少し動く
-            myPosition = gameObject.transform.position;
-            string targetTag = transform.parent.tag =="Blue" ? "Red" : "Blue";
-            GameObject target = SearchTarget(searchCapacity, targetTag, gameObject);
-            if (target != null)
-            {
-                yourPosition = target.transform.position;
-                cpuDirection = yourPosition - myPosition;
-            }
-            cpuPhaseTime += Time.deltaTime;
-        }
-        else
-        {
-            myPosition = gameObject.transform.position;
-            string targetTag = transform.parent.tag =="Blue" ? "Red" : "Blue";
-            GameObject target = SearchTarget(searchCapacity, targetTag, gameObject);
-            if (target != null)
-            {
-                yourPosition = target.transform.position;
-                distance = Vector2.Distance(yourPosition, myPosition);
-                if (distance < 1.2f)
-                {
-                    // 近くにいる場合斬撃
-                    StartCoroutine(machine.Slash());
-                }
-                else
-                {
-                    // 離れている場合射撃
-                    target = SearchTarget(searchCapacity, targetTag, gameObject);
-                    yourPosition = target.transform.position;
-                    cpuDirection = yourPosition - myPosition;
-                    StartCoroutine(machine.Shoot(target, cpuDirection));
-                }
-            }
-
-            cpuPhaseTime = 0f;
         }
 
         return cpuDirection;
@@ -328,8 +434,8 @@ public class Pilot : MonoBehaviour
             Vector2 yourPosition = target.transform.position;
             if (cpuPhaseTime == 0f)
             {
-                cpuDirection = yourPosition - myPosition;
-                cpuPhaseTime += Time.deltaTime;
+                // 少し動く
+                Approach(yourPosition, myPosition);
             }
             else if (cpuPhaseTime < 0.1f)
             {
@@ -338,18 +444,7 @@ public class Pilot : MonoBehaviour
             else if (cpuPhaseTime >= 0.1f)
             {
                 // 攻撃
-                float distanceX = yourPosition.x - myPosition.x;
-                float distanceY = yourPosition.y - myPosition.y;
-                if (Mathf.Abs(distanceX) < 0.7f && Mathf.Abs(distanceY) < 0.3f)
-                {
-                    // 近距離の場合斬撃
-                    StartCoroutine(machine.Slash());
-                }
-                else
-                {
-                    // 離れている時射撃
-                    StartCoroutine(machine.Shoot(target, cpuDirection));
-                }
+                Attack(yourPosition, myPosition, target);
                 cpuPhaseTime = 0f;
             }
         }
@@ -359,8 +454,7 @@ public class Pilot : MonoBehaviour
             if (cpuPhaseTime == 0f)
             {
                 // 向きを変更
-                cpuDirection = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f));
-                cpuPhaseTime += Time.deltaTime;
+                MoveRandom();
             }
             else if (cpuPhaseTime > 0.5f)
             {
@@ -390,10 +484,6 @@ public class Pilot : MonoBehaviour
 
             // ターゲットの位置を把握し自分が動いていなかったら方角を決める
             Vector2 yourPosition = target.transform.position;
-            // if (cpuDirection == Vector2.zero || cpuDirection == null)
-            // {
-            //     cpuDirection = yourPosition - myPosition;
-            // }
 
             // レイキャストを使用して前方に障害物があるか判定
             Vector2 targetDirection = yourPosition - myPosition;
@@ -404,27 +494,7 @@ public class Pilot : MonoBehaviour
             if (hit.collider != null && hit.collider.CompareTag("Wall"))
             {
                 // 障害物がある場合、ネットワーク沿いに移動
-                
-                GameObject myNearestNodeObject = SearchTarget(searchCapacity, "Node", gameObject);
-                Node myNearestNode = myNearestNodeObject.GetComponent<Node>();
-                Node targetNearestNode = SearchTarget(searchCapacity, "Node", target).GetComponent<Node>();
-                Vector2 myNearestNodePosition = myNearestNodeObject.transform.position;
-
-                if (currentNode == null)
-                {
-                    // ネットワーク上にいない場合は一番近いノードに向かう
-                    nextNode = myNearestNode;
-                }
-
-                if (Vector2.Distance(myNearestNodePosition, myPosition) < MIN_DISTANCE && currentNode != myNearestNode)
-                {
-                    // 一番近いノードに到達したら次のノードに向かう
-                    // 現在のノードを更新する
-                    currentNode = myNearestNode;
-                    nextNode = dijkstra.FindShortestPath(currentNode, targetNearestNode);
-                }
-                
-                cpuDirection = (Vector2)nextNode.transform.position - myPosition;
+                Explore(myPosition, target);
             }
             else
             {
@@ -438,6 +508,171 @@ public class Pilot : MonoBehaviour
             // ターゲットが見えない場合動かない
             cpuDirection = Vector2.zero;
             currentNode = null;
+        }
+
+        return cpuDirection;
+    }
+
+    // バランス型CPU
+    Vector2 CpuBalance()
+    {
+        // 動く
+        Vector2 myPosition = gameObject.transform.position;
+        string targetTag = transform.parent.tag == "Blue" ? "Red" : "Blue";
+        GameObject target = SearchTarget(searchCapacity, targetTag, gameObject);
+        if (target != null)
+        {
+            // ターゲットが見える場合
+            // 索敵範囲
+            float searchRange = Calculator.Instance.CalculateSearchRange(searchCapacity);
+
+            // ターゲットの位置を把握し自分が動いていなかったら方角を決める
+            Vector2 yourPosition = target.transform.position;
+
+            // レイキャストを使用して前方に障害物があるか判定
+            Vector2 targetDirection = yourPosition - myPosition;
+            Vector2 rayStartPosition = new Vector2(transform.position.x + targetDirection.normalized.x * MACHINE_OFFSET, transform.position.y + targetDirection.normalized.y * MACHINE_OFFSET);
+            RaycastHit2D hit = Physics2D.Raycast(rayStartPosition, targetDirection, searchRange - MACHINE_OFFSET);
+            Debug.DrawLine(rayStartPosition, hit.point, Color.red);
+
+            if (hit.collider != null && hit.collider.CompareTag("Wall"))
+            {
+                // 障害物がある場合、ネットワーク沿いに移動
+                Explore(myPosition, target);
+                Debug.Log("探索");
+            }
+            else
+            {
+                // 障害物がない場合、以下行動パターン
+                // 敵の弾を検知
+                GameObject targetBallet = SearchBallet(searchCapacity, "Ballet", gameObject);
+                if (targetBallet == null)
+                {
+                    if (cpuPhaseTime == 0f)
+                    {
+                        // 弾が近くになければたたかう
+                        float random = Random.Range(0f, 1f);
+                        if (random <= 0.1f)
+                        {
+                            // 様子を見る
+                            Stop();
+                            Debug.Log("様子を見る");
+                        }
+                        else if (random <= 0.2f)
+                        {
+                            // ランダムに動く
+                            MoveRandom();
+                            Debug.Log("ランダムに動く");
+                        }
+                        else if (random <= 0.5f)
+                        {
+                            // 近づく
+                            Approach(yourPosition, myPosition);
+                            Debug.Log("近づく");
+                        }
+                        else
+                        {
+                            // 攻撃する
+                            Approach(yourPosition, myPosition);
+                            Attack(yourPosition, myPosition, target);
+                            Debug.Log("攻撃する");
+                        }
+                    }
+                    else if (cpuPhaseTime < 0.5f)
+                    {
+                        cpuPhaseTime += Time.deltaTime;
+                    }
+                    else
+                    {
+                        // 行動パターンリセット
+                        cpuPhaseTime = 0f;
+                        isDashing = false;
+                        machine.OffDefence();
+                        currentNode = null;
+                        Debug.Log("リセット");
+                    }
+                }
+                else
+                {
+                    if (cpuPhaseTime == 0f)
+                    {
+                        // 弾が近くにあれば回避or防御
+                        float random = Random.Range(0f, 1f);
+                        if (random <= 0.5f)
+                        {
+                            // 回避
+                            isDashing = true;
+                            Leave(targetBallet.transform.position, myPosition);
+                            Debug.Log("回避");
+                        }
+                        else
+                        {
+                            // 防御
+                            Defense();
+                            Debug.Log("防御");
+                        }
+                    }
+                    else if (cpuPhaseTime < 0.5f)
+                    {
+                        cpuPhaseTime += Time.deltaTime;
+                    }
+                    else
+                    {
+                        // 行動パターンリセット
+                        cpuPhaseTime = 0f;
+                        isDashing = false;
+                        machine.OffDefence();
+                        currentNode = null;
+                        Debug.Log("リセット");
+                    }
+                }
+            }
+        }
+        else
+        {
+            // ターゲットが見えない場合、ネットワーク沿いに移動
+            string targetStation = transform.parent.tag == "Blue" ? "StationEnemy" : "Station";
+            GameObject opponentStationObject = GameObject.Find(targetStation);
+            Explore(myPosition, opponentStationObject);
+            Debug.Log("探索");
+        }
+
+        return cpuDirection;
+    }
+
+    // 味方追従CPU
+    Vector2 CpuFollow()
+    {
+        Vector2 myPosition = gameObject.transform.position;
+        string targetTag = transform.parent.tag == "Blue" ? "Red" : "Blue";
+        GameObject target = SearchTarget(searchCapacity, targetTag, gameObject);
+        if (target != null)
+        {
+            // ターゲットが見える場合、バランス行動
+            CpuBalance();
+        }
+        else
+        {
+            // ターゲットが見えない場合、プレイヤーに追従
+            string allyTag = transform.parent.tag == "Blue" ? "Blue" : "Red";
+            GameObject ally = SearchAlly(searchCapacity, allyTag, gameObject);
+            if (ally != null)
+            {
+                // プレイヤーが見える場合追従
+                Vector2 yourPosition = ally.transform.position;
+                if (Vector2.Distance(yourPosition, myPosition) >= 1f)
+                {
+                    Approach(yourPosition, myPosition);
+                }
+                else
+                {
+                    Stop();
+                }
+            }
+            else{
+                // プレイヤーが見えない場合、バランス行動
+                CpuBalance();
+            }
         }
 
         return cpuDirection;
