@@ -33,6 +33,7 @@ public class Pilot : MonoBehaviour
 
     private Vector2 cpuDirection; // CPUの移動方向
     private float cpuPhaseTime; // CPUの行動フェーズ切替時間
+    private bool isAttack; // CPUの行動が攻撃
     private Machine machine; // Machineスクリプト
     private bool isDoubleTap; // 方向キー2連続押しかどうか
     private bool isDashing; // ダッシュ中かどうか
@@ -248,7 +249,7 @@ public class Pilot : MonoBehaviour
     public GameObject SearchBallet(int searchCapacity, string searchTag, GameObject searchObject)
     {
         // 索敵範囲
-        float searchRange = Calculator.Instance.CalculateSearchRange(searchCapacity);
+        float searchRange = Calculator.Instance.CalculateSearchRange(searchCapacity / 2);
 
         // 一番近いターゲットを切り替える
         GameObject[] targets = GameObject.FindGameObjectsWithTag(searchTag);
@@ -289,10 +290,10 @@ public class Pilot : MonoBehaviour
         {
             Vector2 targetPosition = target.transform.position;
             float distance = Vector2.Distance(targetPosition, searchPosition);
-            if (distance < nearest && distance <= searchRange)
+            if (distance < nearest && distance <= searchRange && target.GetComponent<Unit>() != null)
             {
-                // ステーションと自身は除外
-                if (target.GetComponent<Unit>() != null && distance != 0f)
+                // プレイヤーのみ追従
+                if (!target.GetComponent<Unit>().IsCpu)
                 {
                     // 最短距離更新
                     nearest = distance;
@@ -320,6 +321,15 @@ public class Pilot : MonoBehaviour
     void Leave(Vector2 yourPosition, Vector2 myPosition)
     {
         cpuDirection = myPosition - yourPosition;
+        cpuPhaseTime += Time.deltaTime;
+    }
+    // 避ける
+    void Avert(Vector2 yourPosition, Vector2 myPosition)
+    {
+        // 弾に対して垂直方向に移動
+        int randomValue = Random.Range(0, 2) * 2 - 1;
+        Quaternion rotation = Quaternion.Euler(0f, 0f, 90f * randomValue);
+        cpuDirection = rotation * (myPosition - yourPosition);
         cpuPhaseTime += Time.deltaTime;
     }
     // ランダムに動く
@@ -539,7 +549,7 @@ public class Pilot : MonoBehaviour
             {
                 // 障害物がある場合、ネットワーク沿いに移動
                 Explore(myPosition, target);
-                Debug.Log("探索");
+                Debug.Log("探索1");
             }
             else
             {
@@ -574,9 +584,15 @@ public class Pilot : MonoBehaviour
                         {
                             // 攻撃する
                             Approach(yourPosition, myPosition);
-                            Attack(yourPosition, myPosition, target);
+                            isAttack = true;
                             Debug.Log("攻撃する");
                         }
+                    }
+                    else if (cpuPhaseTime < 0.1f && isAttack)
+                    {
+                        isAttack = false;
+                        Attack(yourPosition, myPosition, target);
+
                     }
                     else if (cpuPhaseTime < 0.5f)
                     {
@@ -602,7 +618,7 @@ public class Pilot : MonoBehaviour
                         {
                             // 回避
                             isDashing = true;
-                            Leave(targetBallet.transform.position, myPosition);
+                            Avert(targetBallet.transform.position, myPosition);
                             Debug.Log("回避");
                         }
                         else
@@ -634,7 +650,7 @@ public class Pilot : MonoBehaviour
             string targetStation = transform.parent.tag == "Blue" ? "StationEnemy" : "Station";
             GameObject opponentStationObject = GameObject.Find(targetStation);
             Explore(myPosition, opponentStationObject);
-            Debug.Log("探索");
+            Debug.Log("探索2");
         }
 
         return cpuDirection;
