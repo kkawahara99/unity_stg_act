@@ -8,7 +8,7 @@ public class Shield : MonoBehaviour
     [SerializeField]
     private int def; // 装甲
     [SerializeField]
-    const float COME_BACK_TIME = 0.2f; // ダウン復帰時間
+    const float COME_BACK_TIME = 0.05f; // ダウン復帰時間
     [SerializeField]
     private GameObject explosionPrefab; // 爆風プレハブ
     [SerializeField]

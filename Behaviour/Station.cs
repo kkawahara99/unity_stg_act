@@ -68,7 +68,7 @@ public class Station : MonoBehaviour
             StartCoroutine(Crush());
         }
 
-        if ((float)currentHP / (float)hitPoint <= deployRate && !isDeploy)
+        if ((float)currentHP / (float)hitPoint <= deployRate && !isDeploy && !isDead)
         {
             isDeploy = true;
             // 残りHPがデプロイHP率以下の時ユニット展開する
