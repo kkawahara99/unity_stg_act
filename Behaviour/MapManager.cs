@@ -17,13 +17,13 @@ public class MapManager : MonoBehaviour
     private float minY;
     public float MinY { get => minY; }
 
-    public System.Type targetType = typeof(Unit);
+    // public System.Type targetType = typeof(Unit);
     const float BORDER_OFFSET = 0.125f; // ボーダーの幅の半分の値
 
     void Start()
     {
         displayBorders();
-        DeployUnits();
+        // DeployUnits();
     }
 
     // ボーダーラインを表示
@@ -57,14 +57,14 @@ public class MapManager : MonoBehaviour
     }
 
     // ユニットを展開する
-    void DeployUnits()
-    {
-        Component[] components  = GetComponentsInChildren(targetType, true);
-        foreach (Component component in components)
-        {
-            Unit unit = component.gameObject.GetComponent<Unit>();
-            unit.DeployMachine();
-            unit.DeployPilot();
-        }
-    }
+    // void DeployUnits()
+    // {
+    //     Component[] components  = GetComponentsInChildren(targetType, true);
+    //     foreach (Component component in components)
+    //     {
+    //         Unit unit = component.gameObject.GetComponent<Unit>();
+    //         unit.DeployMachine();
+    //         unit.DeployPilot();
+    //     }
+    // }
 }

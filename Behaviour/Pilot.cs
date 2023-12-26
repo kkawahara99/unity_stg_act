@@ -18,6 +18,8 @@ public class Pilot : MonoBehaviour
     public int SearchCapacity { get => searchCapacity; }
     [SerializeField] private AIMode aiMode; // AIモード
 
+    public int objectNo;
+
     public enum AIMode
     {
         Simple,    // 単純
@@ -50,6 +52,8 @@ public class Pilot : MonoBehaviour
     private Node nextNode; // 次のノード
     private Unit unit;
     public Unit Unit { get => unit; }
+    private PilotData pilotData;
+    public PilotData PilotData { get => pilotData; }
 
     void Start()
     {
@@ -692,5 +696,18 @@ public class Pilot : MonoBehaviour
         }
 
         return cpuDirection;
+    }
+
+    // データ初期化
+    public void InitializeData()
+    {
+        pilotData = transform.parent.GetComponent<Unit>().UnitData.pilotData;
+        this.pilotName = pilotData.pilotName;
+        this.shootability = pilotData.shootability;
+        this.slashability = pilotData.slashability;
+        this.acceleration = pilotData.acceleration;
+        this.luck = pilotData.luck;
+        this.searchCapacity = pilotData.searchCapacity;
+        this.aiMode = pilotData.aiMode;
     }
 }

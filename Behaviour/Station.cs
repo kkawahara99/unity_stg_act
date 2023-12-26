@@ -4,6 +4,30 @@ using UnityEngine;
 
 public class Station : MonoBehaviour
 {
+    // Stationのインスタンス
+    // private static Station instance;
+
+    // シングルトンパターンのプロパティ
+    // public static Station Instance
+    // {
+    //     get
+    //     {
+    //         if (instance == null)
+    //         {
+    //             instance = FindObjectOfType<Station>();
+
+    //             if (instance == null)
+    //             {
+    //                 GameObject obj = new GameObject("Station");
+    //                 instance = obj.AddComponent<Station>();
+    //                 DontDestroyOnLoad(instance.gameObject);
+    //             }
+    //         }
+
+    //         return instance;
+    //     }
+    // }
+
     [SerializeField] private int hitPoint; // 耐久力（HP）
     public int HitPoint { get => hitPoint; }
     [SerializeField] private int atc; // 火力（Act）
@@ -11,19 +35,21 @@ public class Station : MonoBehaviour
     [SerializeField] private int def; // 装甲（Def）
     public int Def { get => def; }
     [SerializeField] private int luck; // 運
+    [SerializeField] private StationData stationData;
+    public StationData StationData { get => stationData; }
 
     [SerializeField] private GameObject explosionPrefab;
-    [SerializeField] private GameObject unitPrefab;
 
-    [SerializeField] private List<Unit> units;
-    public List<Unit> Units { get => units; }
-    [SerializeField] private List<GameObject> machineObjects;
-    public List<GameObject> MachineObjects { get => machineObjects; }
-    [SerializeField] private List<GameObject> pilotObjects;
-    public List<GameObject> PilotObjects { get => pilotObjects; }
-    [SerializeField] private float deployRate; // デプロイHP率
+    // [SerializeField] private List<GameObject> unitObjects;
+    // public List<GameObject> UnitObjects { get => unitObjects; }
+    // [SerializeField] private List<GameObject> machineObjects;
+    // public List<GameObject> MachineObjects { get => machineObjects; }
+    // [SerializeField] private List<GameObject> pilotObjects;
+    // public List<GameObject> PilotObjects { get => pilotObjects; }
+    // public StationData stationData;
 
     const float COME_BACK_TIME = 0.2f; // ダウン復帰時間
+    const float DEPLOY_RATE = 0.99f; // 展開レート（残HPが99%以下のとき待機機展開）
     private bool isDown; // ダウン中かどうか
     private int currentHP; // 現在のHP
     private bool isDead;
@@ -31,31 +57,23 @@ public class Station : MonoBehaviour
 
     void Start()
     {
-        // 必要な他コンポーネント取得
-
-        // ステータス初期化
-        currentHP = hitPoint;
-
-        // 初期ユニット登録(仮)
-        Vector2 unitPosition = new Vector2(transform.position.x + 0.5f, transform.position.y);
         if (gameObject.tag == "Blue")
         {
-            GameObject unitObject = Instantiate(unitPrefab, unitPosition, Quaternion.identity);
-            Unit unit = unitObject.GetComponent<Unit>();
-            unit.SetMachinePrefab(machineObjects[0]);
-            unit.SetPilotPrefab(pilotObjects[0]);
-            unit.SetColor(new Color(0.5f, 0.5f, 1f, 1f));
+            // プレイヤーサイドのときの初期設定
+            InitializeData();
 
-            AddUnit(unit);
-
-            // ユニットを展開する
-            DeployUnits();
+            // 味方出撃
+            GenerateUnit();
+            isDeploy = true;
 
             // プレイヤーにカメラを合わせる
             CameraController cameraController = GameObject.Find("Main Camera").GetComponent<CameraController>();
             cameraController.SetUnit();
             cameraController.trackingPlayer(false);
         }
+
+        // ステータス初期化
+        currentHP = hitPoint;
     }
 
     void Update()
@@ -67,36 +85,45 @@ public class Station : MonoBehaviour
             StartCoroutine(Crush());
         }
 
-        if ((float)currentHP / (float)hitPoint <= deployRate && !isDeploy && !isDead)
+        if ((float)currentHP / (float)hitPoint <= DEPLOY_RATE && !isDeploy && !isDead)
         {
             isDeploy = true;
             // 残りHPがデプロイHP率以下の時ユニット展開する
-            GenerateUnit(new Vector2(transform.position.x - 0.5f, transform.position.y));
-            DeployUnits();
+            GenerateUnit();
         }
     }
 
     // ユニット生成
-    void GenerateUnit(Vector2 position)
+    void GenerateUnit()
     {
-        GameObject unitObject = Instantiate(unitPrefab, position, Quaternion.identity, transform);
-        Unit unit = unitObject.GetComponent<Unit>();
-        unit.SetMachinePrefab(machineObjects[0]);
-        unit.SetPilotPrefab(pilotObjects[0]);
-        unit.SetColor(new Color(1f, 0.5f, 0.5f, 1f));
+        // ユニット生成位置を定義
+        int factor = transform.tag == "Blue" ? 1 : -1;
+        Vector2[] generatePositions = new Vector2[5];
+        generatePositions[0] = new Vector2(transform.position.x + 0.5f * factor, transform.position.y);
+        generatePositions[1] = new Vector2(transform.position.x, transform.position.y + 0.5f);
+        generatePositions[2] = new Vector2(transform.position.x, transform.position.y - 0.5f);
+        generatePositions[3] = new Vector2(transform.position.x + 0.5f * factor, transform.position.y + 0.5f);
+        generatePositions[4] = new Vector2(transform.position.x + 0.5f * factor, transform.position.y - 0.5f);
 
-        AddUnit(unit);
+        GameObject unitPrefab = DataManager.Instance.UnitMaster;
+        for (int i = 0; i < stationData.unitDatas.Count; i++)
+        {
+            // ユニットを生成する
+            GameObject unitObject = Instantiate(unitPrefab, generatePositions[i], Quaternion.identity);
+            unitObject.tag = transform.tag;
+            Unit unit = unitObject.GetComponent<Unit>();
+            unit.unitNo = i;
+            unit.InitializeData();
+            DeployUnit(unitObject);
+        }
     }
 
     // ユニットを展開する
-    void DeployUnits()
+    void DeployUnit(GameObject unitObject)
     {
-        foreach (Unit unit in units)
-        {
-            // unit.SetPosition(position);
-            unit.DeployMachine();
-            unit.DeployPilot();
-        }
+        Unit unit = unitObject.GetComponent<Unit>();
+        unit.DeployMachine();
+        unit.DeployPilot();
     }
 
     // 接触時の処理
@@ -146,20 +173,7 @@ public class Station : MonoBehaviour
             yield return null;
         } while (isDown);
     }
-
-    // HPを減らす
-    void DecreaseHP(int damageValue)
-    {
-        // 現在HPを減らす
-        // 0以下にならないようにする
-        currentHP = Mathf.Max(currentHP - damageValue, 0);
-
-        // 0のときクラッシュする
-        if (currentHP == 0)
-        {
-            StartCoroutine(Crush());
-        }
-    }
+    
     // クラッシュする
     IEnumerator Crush()
     {
@@ -180,33 +194,65 @@ public class Station : MonoBehaviour
         Destroy(gameObject);
     }
 
-    public void AddUnit(Unit unit)
+    // 敵が侵入してきたら待機機展開
+    void OnTriggerEnter2D(Collider2D other)
     {
-        units.Add(unit);
+        // 展開済みの場合return
+        if (isDeploy) return;
+
+        string opponentTag = transform.tag == "Blue" ? "Red" : "Blue";
+        if (other.transform.parent == null) return;
+        if (other.transform.parent.tag == opponentTag)
+        {
+            // 侵入してきたオブジェクトのタグが相手のとき展開
+            isDeploy = true;
+            GenerateUnit();
+        }
     }
 
-    public void AddMachineObjects(GameObject machineObject)
-    {
-        machineObjects.Add(machineObject);
-    }
+    // public void AddUnit(GameObject unitObject)
+    // {
+    //     unitObjects.Add(unitObject);
+    // }
 
-    public void AddPilotObjects(GameObject pilotObject)
-    {
-        pilotObjects.Add(pilotObject);
-    }
+    // public void RemoveUnit(GameObject unitObject)
+    // {
+    //     unitObjects.Remove(unitObject);
+    // }
 
-    public void RemoveUnit(Unit unit)
-    {
-        units.Remove(unit);
-    }
+    // public void AddMachineObjects(GameObject machineObject)
+    // {
+    //     machineObjects.Add(machineObject);
+    // }
 
-    public void RemoveMachineObjects(GameObject machineObject)
-    {
-        machineObjects.Remove(machineObject);
-    }
+    // public void RemoveMachineObjects(GameObject machineObject)
+    // {
+    //     machineObjects.Remove(machineObject);
+    // }
 
-    public void RemovePilotObjects(GameObject pilotObject)
+    // public void AddPilotObjects(GameObject pilotObject)
+    // {
+    //     pilotObjects.Add(pilotObject);
+    // }
+
+    // public void RemovePilotObjects(GameObject pilotObject)
+    // {
+    //     pilotObjects.Remove(pilotObject);
+    // }
+
+    // データ初期化
+    void InitializeData()
     {
-        pilotObjects.Remove(pilotObject);
+        StationData stationData = DataManager.Instance.stationData;
+        this.hitPoint = stationData.hitPoint;
+        this.atc = stationData.atc;
+        this.def = stationData.def;
+        this.luck = stationData.luck;
+        this.stationData = stationData;
+        // for (int i = 0; i < stationData.unitDatas.Count; i++)
+        // {
+        //     UnitData unitData = unitObjects[i].GetComponent<UnitData>();
+        //     unitData = stationData.unitDatas[i];
+        // }
     }
 }

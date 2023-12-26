@@ -44,6 +44,8 @@ public class Machine : MonoBehaviour
     private Pilot pilot; // パイロット情報
     private bool isDead; // 死んでるかどうか
     private Unit _opponentUnit; // ダメージ食らわされた相手ユニット
+    private MachineData machineData;
+    public MachineData MachineData { get => machineData; }
 
     void Start()
     {
@@ -52,7 +54,6 @@ public class Machine : MonoBehaviour
         mapManager = GameObject.Find("MapManager").GetComponent<MapManager>();
         unit = gameObject.transform.parent.GetComponent<Unit>();
 
-        // ステータス初期化
         currentHP = hitPoint;
         currentPP = (float)propellantPoint;
 
@@ -241,9 +242,9 @@ public class Machine : MonoBehaviour
         // 爆風を生成
         Instantiate(explosionPrefab, gameObject.transform.position, Quaternion.identity);
 
-        // ユキノのときはゲームオーバーToDo
+        // プレイヤー機のときはゲームオーバーToDo
         string pilotName = transform.parent.Find("Pilot").GetComponent<Pilot>().PilotName;
-        if (pilotName == "Yukino") Common.Instance.Failed();
+        if (pilotName == "You") Common.Instance.Failed();
 
         // 撃破ユニットの撃破数を増やさせる
         _opponentUnit.IncrementKillCount();
@@ -655,5 +656,23 @@ public class Machine : MonoBehaviour
     public void OffDefence()
     {
         isDefence = false;
+    }
+
+    // 最大HP設定
+    public void SetHitPoint(int hitPoint)
+    {
+        this.hitPoint = hitPoint;
+    }
+
+    // データ初期化
+    public void InitializeData()
+    {
+        machineData = transform.parent.GetComponent<Unit>().UnitData.machineData;
+        this.machineName = machineData.machineName;
+        this.hitPoint = machineData.hitPoint;
+        this.propellantPoint = machineData.propellantPoint;
+        this.atc = machineData.atc;
+        this.def = machineData.def;
+        this.spd = machineData.spd;
     }
 }

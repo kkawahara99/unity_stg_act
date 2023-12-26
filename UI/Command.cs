@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -51,6 +52,40 @@ public class Command : MonoBehaviour
             DataManager.Instance.currentStageNo = 0;
             // 現在のシナリオを初期化
             DataManager.Instance.currentScenarioID = scenarioID;
+
+            // 初期データ登録
+            StationData data = new StationData();
+            data.hitPoint = 50;
+            data.atc = 0;
+            data.def = 10;
+            data.luck = 0;
+            MachineData machineData = new MachineData();
+            machineData.machineName = "Gimo";
+            machineData.hitPoint = 20;
+            machineData.propellantPoint = 20;
+            machineData.atc = 10;
+            machineData.def = 10;
+            machineData.spd = 10;
+            PilotData pilotData = new PilotData();
+            pilotData.pilotName = "you";
+            pilotData.shootability = 10;
+            pilotData.slashability = 10;
+            pilotData.acceleration = 10;
+            pilotData.luck = 10;
+            pilotData.searchCapacity = 10;
+            pilotData.aiMode = Pilot.AIMode.Balance;
+            UnitData unitData = new UnitData();
+            unitData.isCpu = false;
+            unitData.isManual = false; // オプションに依存予定
+            unitData.machineNo = 0;
+            unitData.machineData = machineData;
+            unitData.pilotData = pilotData;
+            data.unitDatas = new List<UnitData>();
+            data.unitDatas.Add(unitData);
+            DataManager.Instance.stationData = data;
+            // GameObject stationObject = Instantiate(DataManager.Instance.stationObject, Vector2.zero, Quaternion.identity);
+            // stationObject.GetComponent<Station>().UnitObjects.Add();
+            // DataManager.Instance.stationObject = stationObject;
         }
 
         SceneManager.LoadScene(distination);

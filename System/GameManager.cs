@@ -34,6 +34,16 @@ public class GameManager : MonoBehaviour
             // 対象のステージNoのマップを生成する
             GameObject mapObject = Instantiate(scenarioMapping.stageMapPrefabs[currentStageNo], Vector2.zero, Quaternion.identity);
             mapObject.name = "MapManager";
+
+            // ステーションを設置し直す
+            // GameObject stationObject = GameObject.Find("Station");
+            // Destroy(stationObject);
+            // StationData stationData = station.stationData;
+            // StationData newStationData = DataManager.Instance.stationData;
+            // stationData = newStationData;
+            // GameObject newStationObject = Instantiate(DataManager.Instance.stationObject, new Vector2(0.5f, 2f), Quaternion.identity, mapObject.transform);
+            // newStationObject.name = "Station";
+            // newStationObject.GetComponent<Station>().MachineObjects[0].GetComponent<Machine>().SetHitPoint(20);
         }
 
         // テスト：API実行
