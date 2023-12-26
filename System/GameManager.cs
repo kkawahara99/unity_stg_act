@@ -52,7 +52,7 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        Pause();
+        // Pause();
     }
 
     void Update()

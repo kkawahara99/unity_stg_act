@@ -332,8 +332,7 @@ public class Pilot : MonoBehaviour
     {
         // 弾に対して垂直方向に移動
         int randomValue = Random.Range(0, 2) * 2 - 1;
-        Quaternion rotation = Quaternion.Euler(0f, 0f, 90f * randomValue);
-        cpuDirection = rotation * (myPosition - yourPosition);
+        cpuDirection = Vector2.Perpendicular(myPosition - yourPosition) * randomValue;
         cpuPhaseTime += Time.deltaTime;
     }
     // ランダムに動く
