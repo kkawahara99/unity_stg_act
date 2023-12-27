@@ -23,7 +23,6 @@ public class Machine : MonoBehaviour
     public GameObject HandWeaponPrefab { get => handWeaponPrefab; }
     [SerializeField] private GameObject shieldPrefab; // 盾装備
     public GameObject ShieldPrefab { get => shieldPrefab; }
-
     [SerializeField] private GameObject explosionPrefab;
 
     private Unit unit; // パラメータ
@@ -42,7 +41,11 @@ public class Machine : MonoBehaviour
     private float currentPP; // 現在の推進力
     private Shield shield; // シールド情報
     private MapManager mapManager; // マップ情報
-    private Pilot pilot;
+    private Pilot pilot; // パイロット情報
+    private bool isDead; // 死んでるかどうか
+    private Unit _opponentUnit; // ダメージ食らわされた相手ユニット
+    private MachineData machineData;
+    public MachineData MachineData { get => machineData; }
 
     void Start()
     {
@@ -51,7 +54,6 @@ public class Machine : MonoBehaviour
         mapManager = GameObject.Find("MapManager").GetComponent<MapManager>();
         unit = gameObject.transform.parent.GetComponent<Unit>();
 
-        // ステータス初期化
         currentHP = hitPoint;
         currentPP = (float)propellantPoint;
 
@@ -85,8 +87,9 @@ public class Machine : MonoBehaviour
     void Update()
     {
         // 0のときクラッシュする
-        if (currentHP == 0)
+        if (currentHP == 0 && !isDead)
         {
+            isDead = true;
             StartCoroutine(Crush());
         }
     }
@@ -174,6 +177,20 @@ public class Machine : MonoBehaviour
             int ret = Common.Instance.DecideEvent(contact, def, pilot.Luck);
             if (ret > 0)
             {
+                // 攻撃相手ユニットの情報を取得する
+                Ballet collidedBallet = contact.collider.gameObject.GetComponent<Ballet>();
+                Weapon collidedWeapon = contact.collider.gameObject.GetComponent<Weapon>();
+                if (collidedBallet != null)
+                {
+                    // 弾に被弾した時
+                    _opponentUnit = collidedBallet.Pilot.Unit;
+                }
+                else if (collidedWeapon != null)
+                {
+                    // 武器に被弾したとき
+                    _opponentUnit = collidedWeapon.Pilot.Unit;
+                }
+
                 // 0より大きい場合、ダメージ処理
                 currentHP = Common.Instance.DecreaseHP(currentHP, ret);
 
@@ -189,28 +206,54 @@ public class Machine : MonoBehaviour
         }
     }
 
+    // HPを回復する
+    public void RecoverHP(int recoveryValue)
+    {
+        // 全快のときはreturn
+        if (hitPoint == currentHP) return;
+
+        // HPを増やす
+        currentHP = Common.Instance.IncreaseHP(hitPoint, currentHP, recoveryValue);
+
+        // HPゲージ更新
+        UpdateHPUI();
+
+    }
+
     // HPゲージ更新
     void UpdateHPUI()
     {
         ChargeUI chargeUI = gameObject.transform.parent.Find("ParamUI").Find("HPGauge").GetComponent<ChargeUI>();
         chargeUI.UpdateChargeUI(currentHP, hitPoint);
+
+        if (hitPoint == currentHP)
+        {
+            // HPがMAXの時はゲージを隠す
+            chargeUI.ShowUI(false);
+        }
     }
 
     // クラッシュする
     IEnumerator Crush()
     {
-        // 本体を削除する
-        Destroy(gameObject.transform.parent.gameObject, COMEBACK_TIME + 0.1f);
-
         // しばらくウェイト
         yield return new WaitForSeconds(COMEBACK_TIME);
 
         // 爆風を生成
         Instantiate(explosionPrefab, gameObject.transform.position, Quaternion.identity);
 
-        // ユキノのときはゲームオーバーToDo
+        // プレイヤー機のときはゲームオーバーToDo
         string pilotName = transform.parent.Find("Pilot").GetComponent<Pilot>().PilotName;
-        if (pilotName == "Yukino") Common.Instance.Failed();
+        if (pilotName == "You") Common.Instance.Failed();
+
+        // 撃破ユニットの撃破数を増やさせる
+        _opponentUnit.IncrementKillCount();
+
+        // アイテム生成
+        Common.Instance.GenerateItem(unit.DropItem, transform);
+
+        // 本体を削除する
+        Destroy(gameObject.transform.parent.gameObject);
     }
 
     // ダウン中からの復帰
@@ -613,5 +656,23 @@ public class Machine : MonoBehaviour
     public void OffDefence()
     {
         isDefence = false;
+    }
+
+    // 最大HP設定
+    public void SetHitPoint(int hitPoint)
+    {
+        this.hitPoint = hitPoint;
+    }
+
+    // データ初期化
+    public void InitializeData()
+    {
+        machineData = transform.parent.GetComponent<Unit>().UnitData.machineData;
+        this.machineName = machineData.machineName;
+        this.hitPoint = machineData.hitPoint;
+        this.propellantPoint = machineData.propellantPoint;
+        this.atc = machineData.atc;
+        this.def = machineData.def;
+        this.spd = machineData.spd;
     }
 }

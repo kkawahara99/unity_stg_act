@@ -74,6 +74,10 @@ public class SESoundData
         Shoot1,
         Slash1,
         Explosion1,
+        Recover1,
+        Recover2,
+        Coin1,
+        Energy1,
     }
 
     public SE se;

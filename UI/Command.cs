@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -5,6 +6,7 @@ using UnityEngine.SceneManagement;
 public class Command : MonoBehaviour
 {
     [SerializeField] private string distination; // 遷移先
+    [SerializeField] private ScenarioManager.ScenarioID scenarioID; // シナリオID
     [SerializeField] private EventType eventType; // イベントタイプ
     [SerializeField] private bool isNextStage; // ステージ進めるか
     [SerializeField] private bool isInit; // ゲーム初期化するか（タイトルではじめから）
@@ -43,7 +45,102 @@ public class Command : MonoBehaviour
         if (isNextStage) DataManager.Instance.currentStageNo += 1;
 
         //　
-        if (isInit) DataManager.Instance.currentStageNo = 0;
+        if (isInit)
+        {
+            // 初めからのとき
+            // 現在のステージNoを初期化
+            DataManager.Instance.currentStageNo = 0;
+            // 現在のシナリオを初期化
+            DataManager.Instance.currentScenarioID = scenarioID;
+
+            // 初期データ登録
+            StationData data = DataManager.Instance.stationData;
+            data.hitPoint = 50;
+            data.atc = 0;
+            data.def = 10;
+            data.luck = 0;
+            MachineData machineData = new MachineData();
+            machineData.machineName = "Gimo";
+            machineData.hitPoint = 20;
+            machineData.propellantPoint = 20;
+            machineData.atc = 10;
+            machineData.def = 10;
+            machineData.spd = 10;
+            PilotData pilotData = new PilotData();
+            pilotData.pilotName = "You";
+            pilotData.shootability = 10;
+            pilotData.slashability = 10;
+            pilotData.acceleration = 10;
+            pilotData.luck = 10;
+            pilotData.searchCapacity = 10;
+            pilotData.aiMode = Pilot.AIMode.Balance;
+            UnitData unitData = new UnitData();
+            unitData.isCpu = false;
+            unitData.isManual = false; // オプションに依存予定
+            unitData.machineNo = 0;
+            unitData.machineData = machineData;
+            unitData.pilotData = pilotData;
+            data.unitDatas = new List<UnitData>();
+            data.unitDatas.Add(unitData);
+            // DataManager.Instance.stationData = data;
+            // GameObject stationObject = Instantiate(DataManager.Instance.stationObject, Vector2.zero, Quaternion.identity);
+            // stationObject.GetComponent<Station>().UnitObjects.Add();
+            // DataManager.Instance.stationObject = stationObject;
+        }
+        if (DataManager.Instance.currentStageNo == 6)
+        {
+            // ToDo: 味方機を増やす
+            StationData data = DataManager.Instance.stationData;
+            MachineData machineData = new MachineData();
+            machineData.machineName = "Gimo";
+            machineData.hitPoint = 10;
+            machineData.propellantPoint = 10;
+            machineData.atc = 10;
+            machineData.def = 10;
+            machineData.spd = 10;
+            PilotData pilotData = new PilotData();
+            pilotData.pilotName = "Ally1";
+            pilotData.shootability = 10;
+            pilotData.slashability = 10;
+            pilotData.acceleration = 10;
+            pilotData.luck = 10;
+            pilotData.searchCapacity = 10;
+            pilotData.aiMode = Pilot.AIMode.Follow;
+            UnitData unitData = new UnitData();
+            unitData.isCpu = true;
+            unitData.isManual = false; // オプションに依存予定
+            unitData.machineNo = 0;
+            unitData.machineData = machineData;
+            unitData.pilotData = pilotData;
+            data.unitDatas.Add(unitData);
+        }
+        if (DataManager.Instance.currentStageNo == 7)
+        {
+            // ToDo: 味方機を増やす
+            StationData data = DataManager.Instance.stationData;
+            MachineData machineData = new MachineData();
+            machineData.machineName = "Gimo";
+            machineData.hitPoint = 10;
+            machineData.propellantPoint = 10;
+            machineData.atc = 10;
+            machineData.def = 10;
+            machineData.spd = 10;
+            PilotData pilotData = new PilotData();
+            pilotData.pilotName = "Ally2";
+            pilotData.shootability = 10;
+            pilotData.slashability = 10;
+            pilotData.acceleration = 10;
+            pilotData.luck = 10;
+            pilotData.searchCapacity = 10;
+            pilotData.aiMode = Pilot.AIMode.Follow;
+            UnitData unitData = new UnitData();
+            unitData.isCpu = true;
+            unitData.isManual = false; // オプションに依存予定
+            unitData.machineNo = 0;
+            unitData.machineData = machineData;
+            unitData.pilotData = pilotData;
+            data.unitDatas.Add(unitData);
+        }
 
         SceneManager.LoadScene(distination);
     }
