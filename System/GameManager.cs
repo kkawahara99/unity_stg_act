@@ -11,6 +11,12 @@ public class GameManager : MonoBehaviour
 
     private bool isPaused = false;
     public bool IsPaused { get => isPaused; }
+    private bool isSucceed = false;
+    public bool IsSucceed { get => isSucceed; }
+    public void SetIsSucceed(bool isSucceed){ this.isSucceed = isSucceed; }
+    private bool isFailed = false;
+    public bool IsFailed { get => isFailed; }
+    public void SetIsFailed(bool isFailed){ this.isFailed = isFailed; }
     private Controller controller; // コントローラ
     private CameraController cameraController; // カメラ
 
@@ -63,6 +69,9 @@ public class GameManager : MonoBehaviour
     // スタートボタン検知
     public void OnStart()
     {
+        // 勝敗がついた状態の時はポーズできない
+        if (isSucceed || isFailed) return;
+
         if (controller.StartPhase == InputActionPhase.Started)
         {
             controller.SetStartPhase(InputActionPhase.Performed);

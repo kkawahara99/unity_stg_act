@@ -6,11 +6,13 @@ public class CameraController : MonoBehaviour
     private Camera mainCamera;
     private Unit trackingUnit; // 追跡するユニット
     private GameManager gameManager; // ゲーム管理
+    public float targetAspectRatio = 16f / 9f; // 目標のアスペクト比（横:縦）
 
     void Awake()
     {
         // メインカメラ取得
         mainCamera = Camera.main;
+        FitAspectRatio();
     }
 
     void Start()
@@ -24,7 +26,49 @@ public class CameraController : MonoBehaviour
         // ポーズ中はカメラ移動停止する
         if (gameManager.IsPaused) return;
 
+
         trackingPlayer(true);
+    }
+
+    void FitAspectRatio()
+    {
+        if (mainCamera == null)
+        {
+            Debug.LogError("No camera found");
+            return;
+        }
+
+        // 目標のアスペクト比
+        float targetAspect = targetAspectRatio;
+
+        // 現在の画面のアスペクト比
+        float windowAspect = (float)Screen.width / (float)Screen.height;
+
+        // 目標のアスペクト比に合わせて、ビューポートの幅または高さを変更
+        float scaleHeight = windowAspect / targetAspect;
+
+        Camera cameraComponent = GetComponent<Camera>();
+
+        // 現在の画面アスペクト比が目標よりも横に広い場合
+        if (scaleHeight < 1.0f)
+        {
+            Rect rect = cameraComponent.rect;
+            rect.width = 1.0f;
+            rect.height = scaleHeight;
+            rect.x = 0;
+            rect.y = (1.0f - scaleHeight) / 2.0f;
+            cameraComponent.rect = rect;
+        }
+        else // 目標よりも縦に長い場合
+        {
+            float scaleWidth = 1.0f / scaleHeight;
+            Rect rect = cameraComponent.rect;
+            rect.width = scaleWidth;
+            rect.height = 1.0f;
+            rect.x = (1.0f - scaleWidth) / 2.0f;
+            rect.y = 0;
+            cameraComponent.rect = rect;
+        }
     }
 
     public void SetUnit()
@@ -46,6 +90,8 @@ public class CameraController : MonoBehaviour
 
     public void trackingPlayer(bool isLerp)
     {
+        if (trackingUnit == null) return;
+
         // isCpuがfalseのユニットを追跡する（仮）
         Vector2 charaPosition = trackingUnit.transform.position;
         int searchCapacity = trackingUnit.transform.Find("Pilot").GetComponent<Pilot>().SearchCapacity;
