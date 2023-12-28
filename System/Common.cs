@@ -292,7 +292,14 @@ public class Common : MonoBehaviour
         }
 
         // 画面遷移
-        SceneManager.LoadScene("StrategyScene");
+        if (DataManager.Instance.currentStageNo == 7)
+        {
+            SceneManager.LoadScene("TitleScene");
+        }
+        else
+        {
+            SceneManager.LoadScene("StrategyScene");
+        }
     }
 
     // ミッション失敗
