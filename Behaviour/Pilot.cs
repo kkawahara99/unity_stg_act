@@ -388,6 +388,7 @@ public class Pilot : MonoBehaviour
             nextNode = dijkstra.FindShortestPath(currentNode, targetNearestNode);
         }
         
+        Debug.Log(nextNode);
         cpuDirection = (Vector2)nextNode.transform.position - myPosition;
     }
 
