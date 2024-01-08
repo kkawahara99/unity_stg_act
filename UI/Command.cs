@@ -59,13 +59,13 @@ public class Command : MonoBehaviour
             data.atc = 0;
             data.def = 10;
             data.luck = 0;
-            MachineData machineData = new MachineData();
-            machineData.machineName = "Gimo";
-            machineData.hitPoint = 20;
-            machineData.propellantPoint = 20;
-            machineData.atc = 10;
-            machineData.def = 10;
-            machineData.spd = 10;
+            // MachineData machineData = new MachineData();
+            // machineData.machineName = "Gimo";
+            // machineData.hitPoint = 20;
+            // machineData.propellantPoint = 20;
+            // machineData.atc = 10;
+            // machineData.def = 10;
+            // machineData.spd = 10;
             PilotData pilotData = new PilotData();
             pilotData.pilotName = "You";
             pilotData.shootability = 10;
@@ -77,8 +77,12 @@ public class Command : MonoBehaviour
             UnitData unitData = new UnitData();
             unitData.isCpu = false;
             unitData.isManual = false; // オプションに依存予定
-            unitData.machineNo = 0;
-            unitData.machineData = machineData;
+            unitData.color = new Color(0.5f, 0.5f, 0.75f, 1f);
+            unitData.machineKey = "GimoX";
+            unitData.mainWeaponKey = "BeamRifle";
+            unitData.handWeaponKey = "BeamSaber";
+            unitData.shieldKey = "Shield";
+            // unitData.machineData = machineData;
             unitData.pilotData = pilotData;
             data.unitDatas = new List<UnitData>();
             data.unitDatas.Add(unitData);
@@ -91,13 +95,13 @@ public class Command : MonoBehaviour
         {
             // ToDo: 味方機を増やす
             StationData data = DataManager.Instance.stationData;
-            MachineData machineData = new MachineData();
-            machineData.machineName = "Gimo";
-            machineData.hitPoint = 10;
-            machineData.propellantPoint = 10;
-            machineData.atc = 10;
-            machineData.def = 10;
-            machineData.spd = 10;
+            // MachineData machineData = new MachineData();
+            // machineData.machineName = "Gimo";
+            // machineData.hitPoint = 10;
+            // machineData.propellantPoint = 10;
+            // machineData.atc = 10;
+            // machineData.def = 10;
+            // machineData.spd = 10;
             PilotData pilotData = new PilotData();
             pilotData.pilotName = "Ally1";
             pilotData.shootability = 10;
@@ -109,8 +113,8 @@ public class Command : MonoBehaviour
             UnitData unitData = new UnitData();
             unitData.isCpu = true;
             unitData.isManual = false; // オプションに依存予定
-            unitData.machineNo = 0;
-            unitData.machineData = machineData;
+            unitData.machineKey = "gimo";
+            // unitData.machineData = machineData;
             unitData.pilotData = pilotData;
             data.unitDatas.Add(unitData);
         }
@@ -118,13 +122,13 @@ public class Command : MonoBehaviour
         {
             // ToDo: 味方機を増やす
             StationData data = DataManager.Instance.stationData;
-            MachineData machineData = new MachineData();
-            machineData.machineName = "Gimo";
-            machineData.hitPoint = 10;
-            machineData.propellantPoint = 10;
-            machineData.atc = 10;
-            machineData.def = 10;
-            machineData.spd = 10;
+            // MachineData machineData = new MachineData();
+            // machineData.machineName = "Gimo";
+            // machineData.hitPoint = 10;
+            // machineData.propellantPoint = 10;
+            // machineData.atc = 10;
+            // machineData.def = 10;
+            // machineData.spd = 10;
             PilotData pilotData = new PilotData();
             pilotData.pilotName = "Ally2";
             pilotData.shootability = 10;
@@ -136,8 +140,8 @@ public class Command : MonoBehaviour
             UnitData unitData = new UnitData();
             unitData.isCpu = true;
             unitData.isManual = false; // オプションに依存予定
-            unitData.machineNo = 0;
-            unitData.machineData = machineData;
+            unitData.machineKey = "gimo";
+            // unitData.machineData = machineData;
             unitData.pilotData = pilotData;
             data.unitDatas.Add(unitData);
         }

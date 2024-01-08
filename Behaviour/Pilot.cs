@@ -154,16 +154,19 @@ public class Pilot : MonoBehaviour
             // ブーストさせる
             machine.BoostBehaviour(true);
 
-            if (isDoubleTap || isDashing)
+            if ((isDoubleTap || isDashing) && machine.CurrentPP > 0)
             {
                 // ダッシュ状態へ
                 isDashing = true;
-                machine.SetSpeed(currentDirection.normalized, true);
+                machine.SetSpeed(currentDirection.normalized, isDashing);
             }
             else
             {
-                // 通常移動
-                machine.SetSpeed(currentDirection.normalized, false);
+                // ダッシュ解除
+                isDashing = false;
+                isDoubleTap = false;
+
+                machine.SetSpeed(currentDirection.normalized, isDashing);
             }
         }
         else
@@ -175,7 +178,7 @@ public class Pilot : MonoBehaviour
             isDashing = false;
 
             // 速度を下げる
-            machine.SetSpeed(currentDirection.normalized, false);
+            machine.SetSpeed(currentDirection.normalized, isDashing);
         }
     }
 

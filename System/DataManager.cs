@@ -8,12 +8,11 @@ public class DataManager : MonoBehaviour
     public ScenarioManager.ScenarioID currentScenarioID; // 現在のシナリオ
     public int currentStageNo; // 現在のステージNo
     public int coinCount; // 所持コイン数
+    public int currentCoinCount; // 所持コイン数（ステージ内）
     public Elements elements; // 所持エレメント
+    public Elements currentElements; // 所持エレメント（ステージ内）
     public StationData stationData; // ステーションデータ（味方データ）
 
-    public GameObject UnitMaster; // ユニットマスタ
-    public List<GameObject> MachineMaster; // マシンマスタ
-    public GameObject PilotMaster; // パイロットマスタ
 
     private void Awake()
     {
@@ -29,9 +28,21 @@ public class DataManager : MonoBehaviour
     }
 }
 
+// [CreateAssetMenu(menuName = "MyScriptable/Create MasterData")]
+// public class MasterData : ScriptableObject
+// {
+//     public GameObject UnitMaster; // ユニットマスタ
+//     public List<PrefabMapping> MachineMaster; // マシンマスタ
+//     public GameObject PilotMaster; // パイロットマスタ
+//     public List<PrefabMapping> MainWeaponMaster; // メイン武器マスタ
+//     public List<PrefabMapping> HandWeaponMaster; // サブ武器マスタ
+//     public List<PrefabMapping> ShieldMaster; // シールド武器マスタ
+// }
+
 [System.Serializable]
 public class StationData
 {
+    public string stationName;
     public int hitPoint;
     public int atc;
     public int def;
@@ -44,21 +55,25 @@ public class UnitData
 {
     public bool isCpu;
     public bool isManual;
-    public int machineNo;
-    public MachineData machineData;
+    public Color color;
+    public string machineKey;
+    public string mainWeaponKey;
+    public string handWeaponKey;
+    public string shieldKey;
+    // public MachineData machineData;
     public PilotData pilotData;
 }
 
-[System.Serializable]
-public class MachineData
-{
-    public string machineName;
-    public int hitPoint;
-    public int propellantPoint;
-    public int atc;
-    public int def;
-    public int spd;
-}
+// [System.Serializable]
+// public class MachineData
+// {
+//     public string machineName;
+//     public int hitPoint;
+//     public int propellantPoint;
+//     public int atc;
+//     public int def;
+//     public int spd;
+// }
 
 [System.Serializable]
 public class PilotData
@@ -70,4 +85,11 @@ public class PilotData
     public int luck;
     public int searchCapacity;
     public Pilot.AIMode aiMode;
+}
+
+[System.Serializable]
+public class PrefabMapping
+{
+    public string key;
+    public GameObject prefab;
 }

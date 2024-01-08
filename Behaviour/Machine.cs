@@ -39,13 +39,14 @@ public class Machine : MonoBehaviour
     private Vector2 currentVelocity;  // 現在の速度
     private int currentHP; // 現在のHP
     private float currentPP; // 現在の推進力
+    public float CurrentPP  { get => currentPP; }
     private Shield shield; // シールド情報
     private MapManager mapManager; // マップ情報
     private Pilot pilot; // パイロット情報
     private bool isDead; // 死んでるかどうか
     private Unit _opponentUnit; // ダメージ食らわされた相手ユニット
-    private MachineData machineData;
-    public MachineData MachineData { get => machineData; }
+    // private MachineData machineData;
+    // public MachineData MachineData { get => machineData; }
 
     void Start()
     {
@@ -667,12 +668,9 @@ public class Machine : MonoBehaviour
     // データ初期化
     public void InitializeData()
     {
-        machineData = transform.parent.GetComponent<Unit>().UnitData.machineData;
-        this.machineName = machineData.machineName;
-        this.hitPoint = machineData.hitPoint;
-        this.propellantPoint = machineData.propellantPoint;
-        this.atc = machineData.atc;
-        this.def = machineData.def;
-        this.spd = machineData.spd;
+        UnitData unitData = transform.parent.GetComponent<Unit>().UnitData;
+        this.mainWeaponPrefab = Common.Instance.GetPrefabMapping(unitData.mainWeaponKey, MasterData.Instance.MainWeaponMaster);
+        this.handWeaponPrefab = Common.Instance.GetPrefabMapping(unitData.handWeaponKey, MasterData.Instance.HandWeaponMaster);
+        this.shieldPrefab = Common.Instance.GetPrefabMapping(unitData.shieldKey, MasterData.Instance.ShieldMaster);
     }
 }

@@ -105,7 +105,7 @@ public class Station : MonoBehaviour
         generatePositions[3] = new Vector2(transform.position.x + 0.5f * factor, transform.position.y + 0.5f);
         generatePositions[4] = new Vector2(transform.position.x + 0.5f * factor, transform.position.y - 0.5f);
 
-        GameObject unitPrefab = DataManager.Instance.UnitMaster;
+        GameObject unitPrefab = MasterData.Instance.UnitMaster;
         for (int i = 0; i < stationData.unitDatas.Count; i++)
         {
             // ユニットを生成する
