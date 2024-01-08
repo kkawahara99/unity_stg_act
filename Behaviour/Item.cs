@@ -102,7 +102,7 @@ public class Item : MonoBehaviour
         SoundManager.Instance.PlaySE(SESoundData.SE.Coin1);
 
         // 所持金を増やす
-        DataManager.Instance.coinCount += 1;
+        DataManager.Instance.currentCoinCount += 1;
 
         // アイテムを消す
         DestroyItem();
@@ -118,16 +118,16 @@ public class Item : MonoBehaviour
         switch (elementType)
         {
             case Elements.ElementType.Red:
-                DataManager.Instance.elements.redCount += 1;
+                DataManager.Instance.currentElements.redCount += 1;
                 break;
             case Elements.ElementType.Blue:
-                DataManager.Instance.elements.blueCount += 1;
+                DataManager.Instance.currentElements.blueCount += 1;
                 break;
             case Elements.ElementType.Green:
-                DataManager.Instance.elements.greenCount += 1;
+                DataManager.Instance.currentElements.greenCount += 1;
                 break;
             case Elements.ElementType.Yellow:
-                DataManager.Instance.elements.yellowCount += 1;
+                DataManager.Instance.currentElements.yellowCount += 1;
                 break;
         }
 

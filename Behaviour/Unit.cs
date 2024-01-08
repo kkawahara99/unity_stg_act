@@ -3,10 +3,10 @@ using UnityEngine;
 
 public class Unit : MonoBehaviour
 {
-    [SerializeField] private int machineNo; // マシン
-    public int MachineNo { get => machineNo; }
-    // [SerializeField] private GameObject pilotPrefab; // パイロット
-    // public GameObject PilotPrefab { get => pilotPrefab; }
+    [SerializeField] private string machineKey; // マシンキー
+    [SerializeField] private string mainWeaponKey; // メイン武器キー
+    [SerializeField] private string handWeaponKey; // サブ武器キー
+    [SerializeField] private string shieldKey; // シールドキー
     [SerializeField] private bool isCpu = false; // CPUかどうか
     public bool IsCpu { get => isCpu; }
     [SerializeField] private bool isManual = false; // マニュアル操作かどうか
@@ -39,7 +39,7 @@ public class Unit : MonoBehaviour
     // マシンの展開
     public void DeployMachine()
     {
-        GameObject machinePrefab = DataManager.Instance.MachineMaster[machineNo];
+        GameObject machinePrefab = Common.Instance.GetPrefabMapping(machineKey, MasterData.Instance.MachineMaster);
         GameObject machineObject = Instantiate(machinePrefab, transform.position, Quaternion.identity, transform);
         machineObject.name = "Machine";
         machineObject.GetComponent<Machine>().InitializeData();
@@ -48,7 +48,7 @@ public class Unit : MonoBehaviour
     // パイロットの展開
     public void DeployPilot()
     {
-        GameObject pilotPrefab = DataManager.Instance.PilotMaster;
+        GameObject pilotPrefab = MasterData.Instance.PilotMaster;
         GameObject pilotObject = Instantiate(pilotPrefab, transform.position, Quaternion.identity, transform);
         pilotObject.name = "Pilot";
         pilotObject.GetComponent<Pilot>().InitializeData();
@@ -64,7 +64,8 @@ public class Unit : MonoBehaviour
     // データ初期化
     public void InitializeData()
     {
-        if (gameObject.tag == "Blue")
+        bool isAlly = gameObject.tag == "Blue";
+        if (isAlly)
         {
             unitData = GameObject.Find("Station").GetComponent<Station>().StationData.unitDatas[unitNo];
         }
@@ -72,8 +73,13 @@ public class Unit : MonoBehaviour
         {
             unitData = GameObject.Find("StationEnemy").GetComponent<Station>().StationData.unitDatas[unitNo];
         }
+        this.isRight = isAlly ? true : false;
         this.isCpu = unitData.isCpu;
         this.isManual = unitData.isManual;
-        this.machineNo = unitData.machineNo;
+        this.color = unitData.color;
+        this.machineKey = unitData.machineKey;
+        this.mainWeaponKey = unitData.mainWeaponKey;
+        this.handWeaponKey = unitData.handWeaponKey;
+        this.shieldKey = unitData.shieldKey;
     }
 }

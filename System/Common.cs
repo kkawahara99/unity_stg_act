@@ -435,4 +435,15 @@ public class Common : MonoBehaviour
 
         Instantiate(itemBean.ItemPrefab, generatorTransform.position, Quaternion.identity);
     }
+
+    // PrefabMappingのvalueを取得する
+    public GameObject GetPrefabMapping(string key, List<PrefabMapping> datas)
+    {
+        foreach (var data in datas)
+        {
+           if (data.key == key)
+               return data.prefab;
+        }
+        return null; // 該当するkeyが見つからなかった場合
+    }
 }
