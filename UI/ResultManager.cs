@@ -1,9 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
-using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class ResultManager : MonoBehaviour
 {
@@ -20,8 +20,6 @@ public class ResultManager : MonoBehaviour
     const float FADE_DURATION = 0.25f;
     const float WAIT_TIME = 1f;
     const float COUNTING_WAIT_TIME = 0.01f;
-    const float BASE_EXP = 10f;
-    const float EXP_RATIO = 1.1f;
 
     void Start()
     {
@@ -53,7 +51,7 @@ public class ResultManager : MonoBehaviour
         controller.SetShootPhase(InputActionPhase.Performed);
 
         // 効果音（鳴らさない）
-        // SoundManager.Instance.PlaySE(SESoundData.SE.Submit);
+        SoundManager.Instance.PlaySE(SESoundData.SE.Submit);
 
         // 次の結果へ
         if (isDoneItem)
@@ -75,7 +73,7 @@ public class ResultManager : MonoBehaviour
         if (isDoneExp)
         {
             // 画面遷移
-            Debug.Log("次のステージへ");
+            SceneManager.LoadScene("StrategyScene");
         }
     }
 
@@ -139,6 +137,12 @@ public class ResultManager : MonoBehaviour
             tAmount.text = amount.ToString();
             Text tAddAmount = child.Find("GetAmount").GetComponent<Text>();
             tAddAmount.text = addAmount.ToString();
+
+            // 獲得アイテム数が0になったら非表示
+            if (addAmount == 0)
+            {
+                child.Find("GetAmount").gameObject.SetActive(false);
+            }
         }
     }
 
@@ -224,10 +228,16 @@ public class ResultManager : MonoBehaviour
         pilotSlot.transform.Find("Plus").GetChild(0).GetComponent<Text>().text = unitData.pilotData.earnedExp.ToString();
         Slider slider = pilotSlot.transform.Find("ExpBar").GetComponent<Slider>();
         
-        int nextExp = GetNextExp(unitData.pilotData.level);
-        int currentExpToNext = unitData.pilotData.totalExp - GetExpCurrentLevel(unitData.pilotData.level);
+        int nextExp = Common.Instance.GetNextExp(unitData.pilotData.level);
+        int currentExpToNext = unitData.pilotData.totalExp - Common.Instance.GetExpCurrentLevel(unitData.pilotData.level);
         float fillAmount = (float)currentExpToNext / nextExp;
         slider.value = fillAmount;
+
+        // 獲得経験値が0になったら非表示
+        if (unitData.pilotData.earnedExp == 0)
+        {
+            pilotSlot.transform.Find("Plus").gameObject.SetActive(false);
+        }
     }
 
     // EXP獲得数を徐々に加算
@@ -247,11 +257,16 @@ public class ResultManager : MonoBehaviour
             unitData.pilotData.earnedExp--;
             unitData.pilotData.totalExp++;
             int nextLevel = unitData.pilotData.level + 1;
-            if (unitData.pilotData.totalExp >= GetExpCurrentLevel(nextLevel))
+            if (unitData.pilotData.totalExp >= Common.Instance.GetExpCurrentLevel(nextLevel))
             {
                 // 経験値が次のレベルに達していたらレベルアップ
                 if (unitData.pilotData.level < 99)
+                {
                     unitData.pilotData.level++;
+                    // 効果音
+                    SoundManager.Instance.PlaySE(SESoundData.SE.Levelup1);
+                }
+                    
             }
 
             isZeros.Add(false);
@@ -359,17 +374,5 @@ public class ResultManager : MonoBehaviour
 
         // コルーチン終了フラグオン
         isDoneExp = true;
-    }
-
-    // 次のレベルまでのEXPを取得する
-    public int GetNextExp(int level)
-    {
-        return GetExpCurrentLevel(level + 1) - GetExpCurrentLevel(level);
-    }
-
-    // 現在のレベルに必要な経験値を取得する
-    public int GetExpCurrentLevel(int level)
-    {
-        return (int)Math.Ceiling(BASE_EXP * (Math.Pow(EXP_RATIO, (level - 1)) - 1) / (EXP_RATIO - 1));
     }
 }

@@ -11,8 +11,8 @@ public class Machine : MonoBehaviour
     public int HitPoint { get => hitPoint; }
     [SerializeField] private int propellantPoint; // 推進力（PP）
     public int PropellantPoint { get => propellantPoint; }
-    [SerializeField] private int atc; // 火力（Act）
-    public int Atc { get => atc; }
+    [SerializeField] private int atk; // 火力（Act）
+    public int Atk{ get => atk; }
     [SerializeField] private int def; // 装甲（Def）
     public int Def { get => def; }
     [SerializeField] private int spd; // 機動性（Speed）
@@ -245,10 +245,11 @@ public class Machine : MonoBehaviour
 
         // プレイヤー機のときはゲームオーバーToDo
         string pilotName = transform.parent.Find("Pilot").GetComponent<Pilot>().PilotName;
-        if (pilotName == "You") Common.Instance.Failed();
+        if (pilotName == "アナタ") Common.Instance.Failed();
 
-        // 撃破ユニットの撃破数を増やさせる
+        // 撃破ユニットの撃破数、EXPを増やさせる
         _opponentUnit.IncrementKillCount();
+        _opponentUnit.IncreaseEarnedExp(Common.Instance.GetGrantExp(transform.parent));
 
         // アイテム生成
         Common.Instance.GenerateItem(unit.DropItem, transform);

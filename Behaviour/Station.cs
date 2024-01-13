@@ -30,8 +30,8 @@ public class Station : MonoBehaviour
 
     [SerializeField] private int hitPoint; // 耐久力（HP）
     public int HitPoint { get => hitPoint; }
-    [SerializeField] private int atc; // 火力（Act）
-    public int Atc { get => atc; }
+    [SerializeField] private int atk; // 火力（Act）
+    public int Atk{ get => atk; }
     [SerializeField] private int def; // 装甲（Def）
     public int Def { get => def; }
     [SerializeField] private int luck; // 運
@@ -39,6 +39,8 @@ public class Station : MonoBehaviour
     public StationData StationData { get => stationData; }
 
     [SerializeField] private GameObject explosionPrefab;
+    [SerializeField] private int grantExp;
+    [SerializeField] private int grantCoin;
 
     // [SerializeField] private List<GameObject> unitObjects;
     // public List<GameObject> UnitObjects { get => unitObjects; }
@@ -190,6 +192,15 @@ public class Station : MonoBehaviour
         // 敵軍ステーションの場合クリアToDo
         if (gameObject.tag == "Red") Common.Instance.Succeeded();
 
+        // 全ユニットのEXPを増やさせる
+        Unit[] units = FindObjectsOfType<Unit>();
+        foreach (Unit unit in units)
+        {
+            unit.IncreaseEarnedExp(grantExp);
+        }
+        // コインを増やす
+        DataManager.Instance.currentCoinCount += grantCoin;
+
         // 削除する
         Destroy(gameObject);
     }
@@ -245,7 +256,7 @@ public class Station : MonoBehaviour
     {
         StationData stationData = DataManager.Instance.stationData;
         this.hitPoint = stationData.hitPoint;
-        this.atc = stationData.atc;
+        this.atk= stationData.atk;
         this.def = stationData.def;
         this.luck = stationData.luck;
         this.stationData = stationData;

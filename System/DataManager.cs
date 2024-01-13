@@ -44,7 +44,7 @@ public class StationData
 {
     public string stationName;
     public int hitPoint;
-    public int atc;
+    public int atk;
     public int def;
     public int luck;
     public List<UnitData> unitDatas;
@@ -70,7 +70,7 @@ public class UnitData
 //     public string machineName;
 //     public int hitPoint;
 //     public int propellantPoint;
-//     public int atc;
+//     public int atk;
 //     public int def;
 //     public int spd;
 // }
@@ -88,6 +88,7 @@ public class PilotData
     public int level;
     public int totalExp;
     public int earnedExp;
+    public int killCount;
 }
 
 [System.Serializable]

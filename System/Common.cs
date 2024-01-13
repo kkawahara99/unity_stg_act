@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,6 +8,8 @@ using UnityEngine.UI;
 public class Common : MonoBehaviour
 {
     [SerializeField] GameObject explosionPrefab; // 爆風プレハブ
+    const float BASE_EXP = 10f;
+    const float EXP_RATIO = 1.1f;
 
     public static Common Instance { get; private set; }
 
@@ -117,20 +120,20 @@ public class Common : MonoBehaviour
         if (collidedBallet != null)
         {
             // 弾に被弾したとき
-            int atc = collidedBallet.Power;
+            int atk= collidedBallet.Power;
             int luck = collidedBallet.Pilot.Luck;
 
             // ダメージ処理
-            damageValue = Calculator.Instance.CalculateDamage(atc, luck, def, deffenceLuck);
+            damageValue = Calculator.Instance.CalculateDamage(atk, luck, def, deffenceLuck);
         }
         else if (collidedWeapon != null)
         {
             // 武器に被弾したとき
-            int atc = collidedWeapon.Machine.Atc + collidedWeapon.Power;
+            int atk= collidedWeapon.Machine.Atk+ collidedWeapon.Power;
             int luck = collidedWeapon.Pilot.Luck;
 
             // ダメージ処理
-            damageValue = Calculator.Instance.CalculateDamage(atc, luck, def, deffenceLuck);
+            damageValue = Calculator.Instance.CalculateDamage(atk, luck, def, deffenceLuck);
         }
         else
         {
@@ -261,7 +264,6 @@ public class Common : MonoBehaviour
         // 移動量を計算
         float moveAmount = 700f * Time.deltaTime;
 
-        Debug.Log(rectTransformL.position.x);
         while (rectTransformL.position.x < 433f)
         {
             // テキストを移動
@@ -298,7 +300,7 @@ public class Common : MonoBehaviour
         }
         else
         {
-            SceneManager.LoadScene("StrategyScene");
+            SceneManager.LoadScene("ResultScene");
         }
     }
 
@@ -416,7 +418,7 @@ public class Common : MonoBehaviour
         }
 
         // ランダム値生成
-        int randomValue = Random.Range(1, totalFrequency);
+        int randomValue = UnityEngine.Random.Range(1, totalFrequency);
 
         // 出現率に基づきリストを選択
         foreach (ItemBean item in dropItem)
@@ -445,5 +447,38 @@ public class Common : MonoBehaviour
                return data.prefab;
         }
         return null; // 該当するkeyが見つからなかった場合
+    }
+
+    // 次のレベルまでのEXPを取得する
+    public int GetNextExp(int level)
+    {
+        return GetExpCurrentLevel(level + 1) - GetExpCurrentLevel(level);
+    }
+
+    // 現在のレベルに必要な経験値を取得する
+    public int GetExpCurrentLevel(int level)
+    {
+        return (int)Math.Ceiling(BASE_EXP * (Math.Pow(EXP_RATIO, (level - 1)) - 1) / (EXP_RATIO - 1));
+    }
+
+    // ユニットの付与経験値を取得
+    public int GetGrantExp(Transform unitTransform)
+    {
+        float basic = 10;
+        Machine machine = unitTransform.Find("Machine").GetComponent<Machine>();
+        float hp = machine.HitPoint;
+        float pp = machine.PropellantPoint;
+        float atk = machine.Atk;
+        float def = machine.Def;
+        float spd = machine.Spd;
+        Pilot pilot = unitTransform.Find("Pilot").GetComponent<Pilot>();
+        float sh = pilot.Shootability;
+        float sl = pilot.Slashability;
+        float ac = pilot.Acceleration;
+        float lk = pilot.Luck;
+        float sc = pilot.SearchCapacity;
+
+        float sum = basic + hp + pp + atk + def + spd + sh + sl + ac + lk + sc;
+        return (int)Math.Ceiling(BASE_EXP * (Math.Pow(EXP_RATIO, (sum / 40f - 1)) - 1) / (EXP_RATIO - 1) / 4f);
     }
 }

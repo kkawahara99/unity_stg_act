@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -57,8 +58,15 @@ public class Unit : MonoBehaviour
     // 撃破数インクリメント
     public void IncrementKillCount()
     {
-        this.killCount++;
-        Debug.Log(gameObject.name + "：" + killCount);
+        if (unitData == null) return;
+        unitData.pilotData.killCount++;
+    }
+
+    // 獲得経験値増加
+    public void IncreaseEarnedExp(int grantExp)
+    {
+        if (unitData == null) return;
+        unitData.pilotData.earnedExp += grantExp;
     }
 
     // データ初期化

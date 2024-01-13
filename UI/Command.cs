@@ -56,24 +56,25 @@ public class Command : MonoBehaviour
             // 初期データ登録
             StationData data = DataManager.Instance.stationData;
             data.hitPoint = 50;
-            data.atc = 0;
+            data.atk= 0;
             data.def = 10;
             data.luck = 0;
             // MachineData machineData = new MachineData();
             // machineData.machineName = "Gimo";
             // machineData.hitPoint = 20;
             // machineData.propellantPoint = 20;
-            // machineData.atc = 10;
+            // machineData.atk= 10;
             // machineData.def = 10;
             // machineData.spd = 10;
             PilotData pilotData = new PilotData();
-            pilotData.pilotName = "You";
+            pilotData.pilotName = "アナタ";
             pilotData.shootability = 10;
             pilotData.slashability = 10;
             pilotData.acceleration = 10;
             pilotData.luck = 10;
             pilotData.searchCapacity = 10;
             pilotData.aiMode = Pilot.AIMode.Balance;
+            pilotData.level = 1;
             UnitData unitData = new UnitData();
             unitData.isCpu = false;
             unitData.isManual = false; // オプションに依存予定
@@ -99,7 +100,7 @@ public class Command : MonoBehaviour
             // machineData.machineName = "Gimo";
             // machineData.hitPoint = 10;
             // machineData.propellantPoint = 10;
-            // machineData.atc = 10;
+            // machineData.atk= 10;
             // machineData.def = 10;
             // machineData.spd = 10;
             PilotData pilotData = new PilotData();
@@ -130,7 +131,7 @@ public class Command : MonoBehaviour
             // machineData.machineName = "Gimo";
             // machineData.hitPoint = 10;
             // machineData.propellantPoint = 10;
-            // machineData.atc = 10;
+            // machineData.atk= 10;
             // machineData.def = 10;
             // machineData.spd = 10;
             PilotData pilotData = new PilotData();
@@ -165,11 +166,8 @@ public class Command : MonoBehaviour
 
         // 新メニュー生成
         List<GameObject> menuPrefabs = currentMenu.MenuPrefabs;
-        Debug.Log(menuPrefabs);
         GameObject menuPrefab = Common.Instance.FindObjectByName(menuPrefabs, distination);
-        Debug.Log(menuPrefab);
         Instantiate(menuPrefab, menuObject.transform.parent);
-        Debug.Log("新メニュー");
 
         // 現メニュー非活性
         Destroy(menuObject);
