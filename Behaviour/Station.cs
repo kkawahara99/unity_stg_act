@@ -100,10 +100,10 @@ public class Station : MonoBehaviour
         int factor = transform.tag == "Blue" ? 1 : -1;
         Vector2[] generatePositions = new Vector2[5];
         generatePositions[0] = new Vector2(transform.position.x + 0.5f * factor, transform.position.y);
-        generatePositions[1] = new Vector2(transform.position.x, transform.position.y + 0.5f);
-        generatePositions[2] = new Vector2(transform.position.x, transform.position.y - 0.5f);
-        generatePositions[3] = new Vector2(transform.position.x + 0.5f * factor, transform.position.y + 0.5f);
-        generatePositions[4] = new Vector2(transform.position.x + 0.5f * factor, transform.position.y - 0.5f);
+        generatePositions[1] = new Vector2(transform.position.x, transform.position.y + 0.75f);
+        generatePositions[2] = new Vector2(transform.position.x, transform.position.y - 0.75f);
+        generatePositions[3] = new Vector2(transform.position.x + 0.5f * factor, transform.position.y + 0.75f);
+        generatePositions[4] = new Vector2(transform.position.x + 0.5f * factor, transform.position.y - 0.75f);
 
         GameObject unitPrefab = MasterData.Instance.UnitMaster;
         for (int i = 0; i < stationData.unitDatas.Count; i++)

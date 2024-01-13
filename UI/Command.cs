@@ -79,8 +79,8 @@ public class Command : MonoBehaviour
             unitData.isManual = false; // オプションに依存予定
             unitData.color = new Color(0.5f, 0.5f, 0.75f, 1f);
             unitData.machineKey = "GimoX";
-            unitData.mainWeaponKey = "BeamRifle";
-            unitData.handWeaponKey = "BeamSaber";
+            unitData.mainWeaponKey = "BeamGun";
+            unitData.handWeaponKey = "BeamKnife";
             unitData.shieldKey = "Shield";
             // unitData.machineData = machineData;
             unitData.pilotData = pilotData;
@@ -113,7 +113,11 @@ public class Command : MonoBehaviour
             UnitData unitData = new UnitData();
             unitData.isCpu = true;
             unitData.isManual = false; // オプションに依存予定
-            unitData.machineKey = "gimo";
+            unitData.color = new Color(0.5f, 0.5f, 0.75f, 1f);
+            unitData.machineKey = "Gimo";
+            unitData.mainWeaponKey = "BeamGun";
+            unitData.handWeaponKey = "BeamKnife";
+            unitData.shieldKey = "Shield";
             // unitData.machineData = machineData;
             unitData.pilotData = pilotData;
             data.unitDatas.Add(unitData);
@@ -140,7 +144,11 @@ public class Command : MonoBehaviour
             UnitData unitData = new UnitData();
             unitData.isCpu = true;
             unitData.isManual = false; // オプションに依存予定
-            unitData.machineKey = "gimo";
+            unitData.color = new Color(0.5f, 0.5f, 0.75f, 1f);
+            unitData.machineKey = "Gimo";
+            unitData.mainWeaponKey = "BeamGun";
+            unitData.handWeaponKey = "BeamKnife";
+            unitData.shieldKey = "Shield";
             // unitData.machineData = machineData;
             unitData.pilotData = pilotData;
             data.unitDatas.Add(unitData);

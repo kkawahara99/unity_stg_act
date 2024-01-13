@@ -85,6 +85,9 @@ public class PilotData
     public int luck;
     public int searchCapacity;
     public Pilot.AIMode aiMode;
+    public int level;
+    public int totalExp;
+    public int earnedExp;
 }
 
 [System.Serializable]
