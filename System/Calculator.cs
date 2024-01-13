@@ -20,7 +20,7 @@ public class Calculator : MonoBehaviour
     }
 
     // ダメージ計算
-    public int CalculateDamage(int weaponAtc, int offenseLuck, int deffenceDef, int deffenceLuck)
+    public int CalculateDamage(int weaponAtk, int offenseLuck, int deffenceDef, int deffenceLuck)
     {
         float criticalRate;
         float criticalFactor = 1f;
@@ -47,7 +47,7 @@ public class Calculator : MonoBehaviour
         }
         // (攻撃側の火力 - 受け側の装甲) * クリティカル係数 * 乱数
         // 最小ダメージ1、最大ダメージ99
-        int damageValue = (int)Mathf.Clamp((weaponAtc - deffenceDef) * criticalFactor * Random.Range(0.8f, 1.2f), 1f, 99f);
+        int damageValue = (int)Mathf.Clamp((weaponAtk- deffenceDef) * criticalFactor * Random.Range(0.8f, 1.2f), 1f, 99f);
 
         return damageValue;
     }

@@ -106,7 +106,7 @@ public class Weapon : MonoBehaviour
         Ballet ballet = balletObject.GetComponent<Ballet>();
         bool isEnemy = unitObject.tag == "Red" ? true : false;
         ballet.SetIsEnemy(isEnemy);
-        ballet.SetPower(machine.Atc + power);
+        ballet.SetPower(machine.Atk+ power);
         ballet.SetPilot(pilot);
         ballet.SetWeapon(gameObject.GetComponent<Weapon>());
 

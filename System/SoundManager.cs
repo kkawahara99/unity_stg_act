@@ -78,6 +78,8 @@ public class SESoundData
         Recover2,
         Coin1,
         Energy1,
+        Point1,
+        Levelup1,
     }
 
     public SE se;

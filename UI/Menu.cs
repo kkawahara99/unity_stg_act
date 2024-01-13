@@ -53,7 +53,6 @@ public class Menu : MonoBehaviour
         SoundManager.Instance.PlaySE(SESoundData.SE.Select);
 
         Vector2 direction = controller._direction;
-        Debug.Log(direction);
 
         if (direction.y > 0.99f || direction.y < -0.99f)
         {
