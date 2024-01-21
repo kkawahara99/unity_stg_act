@@ -73,7 +73,7 @@ public class Command : MonoBehaviour
             pilotData.acceleration = 10;
             pilotData.luck = 10;
             pilotData.searchCapacity = 10;
-            pilotData.aiMode = Pilot.AIMode.Balance;
+            pilotData.aiMode = Enums.AIMode.Balance;
             pilotData.level = 1;
             UnitData unitData = new UnitData();
             unitData.isCpu = false;
@@ -110,7 +110,7 @@ public class Command : MonoBehaviour
             pilotData.acceleration = 10;
             pilotData.luck = 10;
             pilotData.searchCapacity = 10;
-            pilotData.aiMode = Pilot.AIMode.Follow;
+            pilotData.aiMode = Enums.AIMode.Follow;
             UnitData unitData = new UnitData();
             unitData.isCpu = true;
             unitData.isManual = false; // オプションに依存予定
@@ -141,7 +141,7 @@ public class Command : MonoBehaviour
             pilotData.acceleration = 10;
             pilotData.luck = 10;
             pilotData.searchCapacity = 10;
-            pilotData.aiMode = Pilot.AIMode.Follow;
+            pilotData.aiMode = Enums.AIMode.Follow;
             UnitData unitData = new UnitData();
             unitData.isCpu = true;
             unitData.isManual = false; // オプションに依存予定
@@ -166,7 +166,7 @@ public class Command : MonoBehaviour
 
         // 新メニュー生成
         List<GameObject> menuPrefabs = currentMenu.MenuPrefabs;
-        GameObject menuPrefab = Common.Instance.FindObjectByName(menuPrefabs, distination);
+        GameObject menuPrefab = Common.FindObjectByName(menuPrefabs, distination);
         Instantiate(menuPrefab, menuObject.transform.parent);
 
         // 現メニュー非活性

@@ -7,7 +7,7 @@ public class Item : MonoBehaviour
     [SerializeField] private bool isFull; // 回復アイテムがFullかどうか
     [SerializeField] private Elements.ElementType elementType; // エレメントの種類
 
-    private float lifeTime; // アイテムの生存時間
+    private float lifeTime = 0; // アイテムの生存時間
     const float SOON_LIFE_TIME = 5f; // アイテムが点滅し始める時間
     const float MAX_LIFE_TIME = 7f; // アイテムが消滅する時間
     private bool isClearness; // 透明フラグ
@@ -67,7 +67,7 @@ public class Item : MonoBehaviour
     void ItemRecovery(Transform playerTransform)
     {
         // 対象マシンを取得
-        Machine machine = playerTransform.Find("Machine").GetComponent<Machine>();
+        MachineController machine = playerTransform.Find(MachineConst.MACHINE).GetComponent<MachineController>();
 
         int recoveryValue; // 回復量
 
@@ -77,7 +77,7 @@ public class Item : MonoBehaviour
             SoundManager.Instance.PlaySE(SESoundData.SE.Recover2);
 
             // 全回復
-            recoveryValue = machine.HitPoint;
+            recoveryValue = machine.Model.HitPoint;
         }
         else
         {
@@ -85,7 +85,7 @@ public class Item : MonoBehaviour
             SoundManager.Instance.PlaySE(SESoundData.SE.Recover1);
 
             // 1/4回復
-            recoveryValue = machine.HitPoint / 4;
+            recoveryValue = machine.Model.HitPoint / 4;
         }
 
         // 回復させる

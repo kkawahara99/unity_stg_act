@@ -12,7 +12,6 @@ public class ResultManager : MonoBehaviour
     [SerializeField] GameObject pilotSlotPrefab; // Pilotスロットプレハブ
 
     private Controller controller; // コントローラ
-    private bool isSubmit; // 決定ボタン押下フラグ
     private bool isDoneItem; // アイテム結果画面完了
     private bool isDoneExp; // EXP結果画面完了
     private GameObject resultObject; // 結果画面のオブジェクト
@@ -228,8 +227,8 @@ public class ResultManager : MonoBehaviour
         pilotSlot.transform.Find("Plus").GetChild(0).GetComponent<Text>().text = unitData.pilotData.earnedExp.ToString();
         Slider slider = pilotSlot.transform.Find("ExpBar").GetComponent<Slider>();
         
-        int nextExp = Common.Instance.GetNextExp(unitData.pilotData.level);
-        int currentExpToNext = unitData.pilotData.totalExp - Common.Instance.GetExpCurrentLevel(unitData.pilotData.level);
+        int nextExp = Common.GetNextExp(unitData.pilotData.level);
+        int currentExpToNext = unitData.pilotData.totalExp - Common.GetExpCurrentLevel(unitData.pilotData.level);
         float fillAmount = (float)currentExpToNext / nextExp;
         slider.value = fillAmount;
 
@@ -257,7 +256,7 @@ public class ResultManager : MonoBehaviour
             unitData.pilotData.earnedExp--;
             unitData.pilotData.totalExp++;
             int nextLevel = unitData.pilotData.level + 1;
-            if (unitData.pilotData.totalExp >= Common.Instance.GetExpCurrentLevel(nextLevel))
+            if (unitData.pilotData.totalExp >= Common.GetExpCurrentLevel(nextLevel))
             {
                 // 経験値が次のレベルに達していたらレベルアップ
                 if (unitData.pilotData.level < 99)

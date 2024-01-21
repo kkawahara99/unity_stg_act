@@ -5,9 +5,13 @@ using UnityEngine;
 public class Unit : MonoBehaviour
 {
     [SerializeField] private string machineKey; // マシンキー
+    public string MachineKey { get => machineKey; }
     [SerializeField] private string mainWeaponKey; // メイン武器キー
+    public string MainWeaponKey { get => mainWeaponKey; }
     [SerializeField] private string handWeaponKey; // サブ武器キー
+    public string HandWeaponKey { get => handWeaponKey; }
     [SerializeField] private string shieldKey; // シールドキー
+    public string ShieldKey { get => shieldKey; }
     [SerializeField] private bool isCpu = false; // CPUかどうか
     public bool IsCpu { get => isCpu; }
     [SerializeField] private bool isManual = false; // マニュアル操作かどうか
@@ -40,10 +44,10 @@ public class Unit : MonoBehaviour
     // マシンの展開
     public void DeployMachine()
     {
-        GameObject machinePrefab = Common.Instance.GetPrefabMapping(machineKey, MasterData.Instance.MachineMaster);
+        GameObject machinePrefab = Common.GetPrefabMapping(machineKey, MasterData.Instance.MachineMaster);
         GameObject machineObject = Instantiate(machinePrefab, transform.position, Quaternion.identity, transform);
         machineObject.name = "Machine";
-        machineObject.GetComponent<Machine>().InitializeData();
+        machineObject.GetComponent<MachineController>().InitializeData();
     }
 
     // パイロットの展開
@@ -52,7 +56,7 @@ public class Unit : MonoBehaviour
         GameObject pilotPrefab = MasterData.Instance.PilotMaster;
         GameObject pilotObject = Instantiate(pilotPrefab, transform.position, Quaternion.identity, transform);
         pilotObject.name = "Pilot";
-        pilotObject.GetComponent<Pilot>().InitializeData();
+        pilotObject.GetComponent<PilotController>().InitializeData();
     }
 
     // 撃破数インクリメント
@@ -72,7 +76,7 @@ public class Unit : MonoBehaviour
     // データ初期化
     public void InitializeData()
     {
-        bool isAlly = gameObject.tag == "Blue";
+        bool isAlly = gameObject.tag == TagConst.BLUE;
         if (isAlly)
         {
             unitData = GameObject.Find("Station").GetComponent<Station>().StationData.unitDatas[unitNo];

@@ -11,6 +11,8 @@ public class MasterData : ScriptableObject
     public List<PrefabMapping> HandWeaponMaster; // サブ武器マスタ
     public List<PrefabMapping> ShieldMaster; // シールド武器マスタ
 
+    public GameObject ExplosionPrefab; // 爆風プレハブ
+
     private static MasterData instance;
 
     public static MasterData Instance
@@ -24,4 +26,11 @@ public class MasterData : ScriptableObject
             return instance;
         }
     }
+}
+
+[System.Serializable]
+public class PrefabMapping
+{
+    public string key;
+    public GameObject prefab;
 }

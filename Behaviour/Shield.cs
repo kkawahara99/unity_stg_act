@@ -10,12 +10,10 @@ public class Shield : MonoBehaviour
     [SerializeField]
     const float COME_BACK_TIME = 0.05f; // ダウン復帰時間
     [SerializeField]
-    private GameObject explosionPrefab; // 爆風プレハブ
-    [SerializeField]
     private Vector2 equipmentPosition; // 装備位置
 
-    private Pilot pilot; // キャラクター情報
-    private Machine machine; // マシン情報
+    private PilotController pilot; // キャラクター情報
+    private MachineController machine; // マシン情報
     private bool isDown; // ダウン中かどうか
     private int currentHP; // 現在のHP
     private bool isAlive = true; // 死活状態
@@ -29,8 +27,8 @@ public class Shield : MonoBehaviour
     void Start()
     {
         // 必要な他コンポーネント取得
-        pilot = gameObject.transform.parent.parent.parent.parent.Find("Pilot").GetComponent<Pilot>();
-        machine = gameObject.transform.parent.parent.parent.GetComponent<Machine>();
+        pilot = gameObject.transform.parent.parent.parent.parent.Find("Pilot").GetComponent<PilotController>();
+        machine = gameObject.transform.parent.parent.parent.GetComponent<MachineController>();
         
         // ステータス初期化
         currentHP = hitPoint;
@@ -48,20 +46,20 @@ public class Shield : MonoBehaviour
     // 接触時の処理
     void OnCollisionEnter2D(Collision2D collision)
     {
-        if (!machine.IsDown && !isDown)
+        if (!machine.Model.IsDown && !isDown)
         {
             // 衝突した部分のコライダーを取得
             ContactPoint2D contact = collision.contacts[0];
 
             // 衝突イベントを判定
-            int ret = Common.Instance.DecideEvent(contact, def, pilot.Luck);
+            int ret = Common.DecideEvent(contact, def, pilot.Model.Luck);
             if (ret > 0)
             {
                 // 0より大きい場合、ダメージ処理
-                currentHP = Common.Instance.DecreaseHP(currentHP, ret);
+                currentHP = Common.DecreaseHP(currentHP, ret);
 
                 // 爆風生成
-                Common.Instance.GenerateExplosionWhenHitted(contact);
+                Common.GenerateExplosionWhenHitted(contact);
 
                 // ダウンの状態に遷移
                 StartCoroutine(ComeBackFromDown());
@@ -73,7 +71,7 @@ public class Shield : MonoBehaviour
     IEnumerator ComeBackFromDown()
     {
         isDown = true;
-        StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, COME_BACK_TIME, isDown));
+        StartCoroutine(Common.ComeBackFromDown(gameObject, COME_BACK_TIME, isDown));
 
         do
         {
@@ -105,7 +103,7 @@ public class Shield : MonoBehaviour
         yield return new WaitForSeconds(COME_BACK_TIME);
 
         // 爆風を生成
-        GameObject explosionObject = Instantiate(explosionPrefab, gameObject.transform.position, Quaternion.identity);
+        GameObject explosionObject = Instantiate(MasterData.Instance.ExplosionPrefab, gameObject.transform.position, Quaternion.identity);
         explosionObject.transform.localScale = new Vector3(0.6f, 0.6f, 0.6f);
 
         // シールドしに

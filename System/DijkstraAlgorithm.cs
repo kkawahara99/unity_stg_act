@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DijkstraAlgorithm : MonoBehaviour
+public class DijkstraAlgorithm: MonoBehaviour
 {
     public List<Node> nodes;
     public List<Link> links;

@@ -14,8 +14,6 @@ public class Meteo : MonoBehaviour
     const float COMEBACK_TIME = 0.2f; // ダウン復帰時間
     const float ITEM_WAIT_TIME = 0.5f; // アイテム待機時間
     [SerializeField]
-    private GameObject explosionPrefab; // 爆風プレハブ
-    [SerializeField]
     private MeteoType meteoTypte; // 隕石のタイプ
     [SerializeField]
     private List<ItemBean> dropItem = new List<ItemBean>(); // ドロップアイテム
@@ -63,20 +61,20 @@ public class Meteo : MonoBehaviour
             ContactPoint2D contact = collision.contacts[0];
 
             // 衝突イベントを判定
-            int ret = Common.Instance.DecideEvent(contact, def, luck);
+            int ret = Common.DecideEvent(contact, def, luck);
             if (ret > 0)
             {
                 // 0より大きい場合、爆風生成
-                Common.Instance.GenerateExplosionWhenHitted(contact);
+                Common.GenerateExplosionWhenHitted(contact);
 
                 if (meteoTypte == MeteoType.Broken)
                 {
                     // Brokenタイプの隕石の場合、ダメージ処理
-                    currentHP = Common.Instance.DecreaseHP(currentHP, ret);
+                    currentHP = Common.DecreaseHP(currentHP, ret);
 
                     // ダウンの状態に遷移
                 isDown = true;
-                StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, COMEBACK_TIME, isDown));
+                StartCoroutine(Common.ComeBackFromDown(gameObject, COMEBACK_TIME, isDown));
                 }
             }
         }
@@ -91,7 +89,7 @@ public class Meteo : MonoBehaviour
     IEnumerator ComeBackFromDown()
     {
         isDown = true;
-        StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, COMEBACK_TIME, isDown));
+        StartCoroutine(Common.ComeBackFromDown(gameObject, COMEBACK_TIME, isDown));
 
         do
         {
@@ -108,11 +106,11 @@ public class Meteo : MonoBehaviour
         yield return new WaitForSeconds(COMEBACK_TIME);
 
         // 爆風を生成
-        GameObject explosionObject = Instantiate(explosionPrefab, transform.position, Quaternion.identity);
+        GameObject explosionObject = Instantiate(MasterData.Instance.ExplosionPrefab, transform.position, Quaternion.identity);
         explosionObject.transform.localScale = new Vector3(0.6f, 0.6f, 0.6f);
 
         // アイテム生成
-        Common.Instance.GenerateItem(dropItem, transform);
+        MonoCommon.Instance.GenerateItem(dropItem, transform);
 
         // 削除する
         Destroy(gameObject);

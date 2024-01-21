@@ -94,7 +94,7 @@ public class CameraController : MonoBehaviour
 
         // isCpuがfalseのユニットを追跡する（仮）
         Vector2 charaPosition = trackingUnit.transform.position;
-        int searchCapacity = trackingUnit.transform.Find("Pilot").GetComponent<Pilot>().SearchCapacity;
+        int searchCapacity = trackingUnit.transform.Find("Pilot").GetComponent<PilotController>().Model.SearchCapacity;
 
         // カメラ位置変更
         Vector3 targetPosition = new Vector3(charaPosition.x, charaPosition.y, -10);
@@ -108,8 +108,8 @@ public class CameraController : MonoBehaviour
         }
         
         // カメラサイズをキャラの索敵能力に合わせて変更
-        mainCamera.orthographicSize = Calculator.Instance.CalculateZoomRate(searchCapacity);
-        float scale = Calculator.Instance.CalculateBackgroundSize(searchCapacity);
+        mainCamera.orthographicSize = Calculator.CalcZoomRate(searchCapacity);
+        float scale = Calculator.CalcBackgroundSize(searchCapacity);
         transform.Find("Background").localScale = new Vector3(scale, scale, scale);
     }
 

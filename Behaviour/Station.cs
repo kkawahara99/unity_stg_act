@@ -4,30 +4,6 @@ using UnityEngine;
 
 public class Station : MonoBehaviour
 {
-    // Stationのインスタンス
-    // private static Station instance;
-
-    // シングルトンパターンのプロパティ
-    // public static Station Instance
-    // {
-    //     get
-    //     {
-    //         if (instance == null)
-    //         {
-    //             instance = FindObjectOfType<Station>();
-
-    //             if (instance == null)
-    //             {
-    //                 GameObject obj = new GameObject("Station");
-    //                 instance = obj.AddComponent<Station>();
-    //                 DontDestroyOnLoad(instance.gameObject);
-    //             }
-    //         }
-
-    //         return instance;
-    //     }
-    // }
-
     [SerializeField] private int hitPoint; // 耐久力（HP）
     public int HitPoint { get => hitPoint; }
     [SerializeField] private int atk; // 火力（Act）
@@ -38,17 +14,8 @@ public class Station : MonoBehaviour
     [SerializeField] private StationData stationData;
     public StationData StationData { get => stationData; }
 
-    [SerializeField] private GameObject explosionPrefab;
     [SerializeField] private int grantExp;
     [SerializeField] private int grantCoin;
-
-    // [SerializeField] private List<GameObject> unitObjects;
-    // public List<GameObject> UnitObjects { get => unitObjects; }
-    // [SerializeField] private List<GameObject> machineObjects;
-    // public List<GameObject> MachineObjects { get => machineObjects; }
-    // [SerializeField] private List<GameObject> pilotObjects;
-    // public List<GameObject> PilotObjects { get => pilotObjects; }
-    // public StationData stationData;
 
     const float COME_BACK_TIME = 0.2f; // ダウン復帰時間
     const float DEPLOY_RATE = 0.99f; // 展開レート（残HPが99%以下のとき待機機展開）
@@ -59,7 +26,7 @@ public class Station : MonoBehaviour
 
     void Start()
     {
-        if (gameObject.tag == "Blue")
+        if (gameObject.tag == TagConst.BLUE)
         {
             // プレイヤーサイドのときの初期設定
             InitializeData();
@@ -99,7 +66,7 @@ public class Station : MonoBehaviour
     void GenerateUnit()
     {
         // ユニット生成位置を定義
-        int factor = transform.tag == "Blue" ? 1 : -1;
+        int factor = transform.tag == TagConst.BLUE ? 1 : -1;
         Vector2[] generatePositions = new Vector2[5];
         generatePositions[0] = new Vector2(transform.position.x + 0.5f * factor, transform.position.y);
         generatePositions[1] = new Vector2(transform.position.x, transform.position.y + 0.75f);
@@ -137,14 +104,14 @@ public class Station : MonoBehaviour
             ContactPoint2D contact = collision.contacts[0];
 
             // 衝突イベントを判定
-            int ret = Common.Instance.DecideEvent(contact, def, luck);
+            int ret = Common.DecideEvent(contact, def, luck);
             if (ret > 0)
             {
                 // 0より大きい場合、爆風生成
-                Common.Instance.GenerateExplosionWhenHitted(contact);
+                Common.GenerateExplosionWhenHitted(contact);
 
                 // ダメージ処理
-                currentHP = Common.Instance.DecreaseHP(currentHP, ret);
+                currentHP = Common.DecreaseHP(currentHP, ret);
 
                 // HPゲージ更新
                 UpdateHPUI();
@@ -166,7 +133,7 @@ public class Station : MonoBehaviour
     IEnumerator ComeBackFromDown()
     {
         isDown = true;
-        StartCoroutine(Common.Instance.ComeBackFromDown(gameObject, COME_BACK_TIME, isDown));
+        StartCoroutine(Common.ComeBackFromDown(gameObject, COME_BACK_TIME, isDown));
 
         do
         {
@@ -183,14 +150,14 @@ public class Station : MonoBehaviour
         yield return new WaitForSeconds(COME_BACK_TIME);
 
         // 爆風を生成
-        GameObject explosionObject = Instantiate(explosionPrefab, gameObject.transform.position, Quaternion.identity);
+        GameObject explosionObject = Instantiate(MasterData.Instance.ExplosionPrefab, gameObject.transform.position, Quaternion.identity);
         explosionObject.transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
 
         // 自軍ステーションの場合ゲームオーバーToDo
-        if (gameObject.tag == "Blue") Common.Instance.Failed();
+        if (gameObject.tag == TagConst.BLUE) MonoCommon.Instance.Failed();
 
         // 敵軍ステーションの場合クリアToDo
-        if (gameObject.tag == "Red") Common.Instance.Succeeded();
+        if (gameObject.tag == TagConst.RED) MonoCommon.Instance.Succeeded();
 
         // 全ユニットのEXPを増やさせる
         Unit[] units = FindObjectsOfType<Unit>();
@@ -211,7 +178,7 @@ public class Station : MonoBehaviour
         // 展開済みの場合return
         if (isDeploy) return;
 
-        string opponentTag = transform.tag == "Blue" ? "Red" : "Blue";
+        string opponentTag = Util.GetOpponentTag(transform.tag);
         if (other.transform.parent == null) return;
         if (other.transform.parent.tag == opponentTag)
         {
@@ -220,36 +187,6 @@ public class Station : MonoBehaviour
             GenerateUnit();
         }
     }
-
-    // public void AddUnit(GameObject unitObject)
-    // {
-    //     unitObjects.Add(unitObject);
-    // }
-
-    // public void RemoveUnit(GameObject unitObject)
-    // {
-    //     unitObjects.Remove(unitObject);
-    // }
-
-    // public void AddMachineObjects(GameObject machineObject)
-    // {
-    //     machineObjects.Add(machineObject);
-    // }
-
-    // public void RemoveMachineObjects(GameObject machineObject)
-    // {
-    //     machineObjects.Remove(machineObject);
-    // }
-
-    // public void AddPilotObjects(GameObject pilotObject)
-    // {
-    //     pilotObjects.Add(pilotObject);
-    // }
-
-    // public void RemovePilotObjects(GameObject pilotObject)
-    // {
-    //     pilotObjects.Remove(pilotObject);
-    // }
 
     // データ初期化
     void InitializeData()
@@ -260,10 +197,5 @@ public class Station : MonoBehaviour
         this.def = stationData.def;
         this.luck = stationData.luck;
         this.stationData = stationData;
-        // for (int i = 0; i < stationData.unitDatas.Count; i++)
-        // {
-        //     UnitData unitData = unitObjects[i].GetComponent<UnitData>();
-        //     unitData = stationData.unitDatas[i];
-        // }
     }
 }

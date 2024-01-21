@@ -30,10 +30,10 @@ public class Weapon : MonoBehaviour
     public int Stock { get => stock; }
 
     private ChargeUI chargeUI;
-    private Pilot pilot;
-    public Pilot Pilot { get => pilot; }
-    private Machine machine;
-    public Machine Machine { get => machine; }
+    private PilotController pilot;
+    public PilotController Pilot { get => pilot; }
+    private MachineController machine;
+    public MachineController Machine { get => machine; }
     private GameObject unitObject;
     public int MaxSpeed { get => maxSpeed; }
     public float ActiveTime { get => activeTime; }
@@ -43,8 +43,8 @@ public class Weapon : MonoBehaviour
     {
         // 他のコンポーネントから情報取得
         chargeUI = gameObject.transform.parent.parent.parent.parent.parent.Find("ParamUI").Find("ChargeGauge").GetComponent<ChargeUI>();
-        pilot = gameObject.transform.parent.parent.parent.parent.parent.Find("Pilot").GetComponent<Pilot>();
-        machine = gameObject.transform.parent.parent.parent.parent.GetComponent<Machine>();
+        pilot = gameObject.transform.parent.parent.parent.parent.parent.Find("Pilot").GetComponent<PilotController>();
+        machine = gameObject.transform.parent.parent.parent.parent.GetComponent<MachineController>();
         unitObject = gameObject.transform.parent.parent.parent.parent.parent.gameObject;
 
         // 弾のチャージコルーチン開始
@@ -106,7 +106,7 @@ public class Weapon : MonoBehaviour
         Ballet ballet = balletObject.GetComponent<Ballet>();
         bool isEnemy = unitObject.tag == "Red" ? true : false;
         ballet.SetIsEnemy(isEnemy);
-        ballet.SetPower(machine.Atk+ power);
+        ballet.SetPower(machine.Model.Atk+ power);
         ballet.SetPilot(pilot);
         ballet.SetWeapon(gameObject.GetComponent<Weapon>());
 

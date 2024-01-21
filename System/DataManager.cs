@@ -84,16 +84,9 @@ public class PilotData
     public int acceleration;
     public int luck;
     public int searchCapacity;
-    public Pilot.AIMode aiMode;
+    public Enums.AIMode aiMode;
     public int level;
     public int totalExp;
     public int earnedExp;
     public int killCount;
-}
-
-[System.Serializable]
-public class PrefabMapping
-{
-    public string key;
-    public GameObject prefab;
 }
