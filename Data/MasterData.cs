@@ -31,6 +31,6 @@ public class MasterData : ScriptableObject
 [System.Serializable]
 public class PrefabMapping
 {
-    public string key;
+    public Enums.WeaponKey key;
     public GameObject prefab;
 }

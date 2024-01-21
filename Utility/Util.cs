@@ -43,4 +43,10 @@ public class Util
     {
         return tag == TagConst.BLUE ? TagConst.RED : TagConst.BLUE;
     }
+
+    // 右向きのときは右腕を、左向きの時は左腕を返す
+    public static string GetArm(bool isRight)
+    {
+        return isRight ? MachineConst.ARM_FORE_GROUND : MachineConst.ARM_BACK_GROUND;
+    }
 }

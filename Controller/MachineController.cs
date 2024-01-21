@@ -311,33 +311,28 @@ public class MachineController : MonoBehaviour
         }
 
         float angle;
-        string rightArm;
-        string leftArm;
         int newOrderInLayer;
         if (model.IsRight && horizontal < 0)
         {
             // 右向きの状態で左方向を押したとき
             // 左向きに変更
-            model.IsRight = false;
             angle = -180f;
-            rightArm = MachineConst.ARM_BACK_GROUND;
-            leftArm = MachineConst.ARM_FORE_GROUND;
             newOrderInLayer = 1;
         }
-        else if (!model.IsRight && horizontal > 0.01f)
+        else if (!model.IsRight && horizontal > 0)
         {
             // 左向きの状態で右方向を押したとき
             // 右向きに変更
-            model.IsRight = true;
             angle = 180f;
-            rightArm = MachineConst.ARM_FORE_GROUND;
-            leftArm = MachineConst.ARM_BACK_GROUND;
             newOrderInLayer = 4;
         }
         else
         {
             return;
         }
+        model.IsRight = !model.IsRight;
+        string rightArm = Util.GetArm(model.IsRight);
+        string leftArm = Util.GetArm(!model.IsRight);
 
         // 旋回
         Vector3 current = transform.rotation.eulerAngles;
@@ -396,16 +391,12 @@ public class MachineController : MonoBehaviour
             return;
         }
 
-        string leftArm;
-        if (model.IsRight)
-            leftArm = MachineConst.ARM_BACK_GROUND;
-        else
-            leftArm = MachineConst.ARM_FORE_GROUND;
+        string leftArm = Util.GetArm(!model.IsRight);
 
         if (!model.IsDefence)
             MoveJoint(transform.Find(leftArm), angle);
-        MoveJoint(transform.Find("Foots"), angle);
-        GameObject booster = transform.Find("Body").Find("Booster").gameObject;
+        MoveJoint(transform.Find(MachineConst.FOOTS), angle);
+        GameObject booster = transform.Find(MachineConst.BODY).Find(MachineConst.BOOSTER).gameObject;
         booster.SetActive(model.IsBoosting);
         float rate = 0.1f;
         booster.transform.localScale = new Vector3(rate, rate, rate);
@@ -415,7 +406,7 @@ public class MachineController : MonoBehaviour
     public void DashBehaviour(bool isDashing)
     {
         // ダッシュ時はブースト大きく
-        GameObject booster = transform.Find("Body").Find("Booster").gameObject;
+        GameObject booster = transform.Find(MachineConst.BODY).Find(MachineConst.BOOSTER).gameObject;
         if (booster.activeSelf)
         {
             float rate = isDashing ? 0.2f : 0.1f;
@@ -436,7 +427,7 @@ public class MachineController : MonoBehaviour
         model.IsAction = true;
 
         // ターゲットに武器を向ける
-        string rightArm = model.IsRight ? MachineConst.ARM_FORE_GROUND : MachineConst.ARM_BACK_GROUND;
+        string rightArm = Util.GetArm(model.IsRight);
         Transform rightArmTransform = transform.Find(rightArm);
         if (target != null)
         {
@@ -497,7 +488,7 @@ public class MachineController : MonoBehaviour
         model.IsAction = true;
 
         // 右腕を振り上げる
-        string rightArm = model.IsRight ? MachineConst.ARM_FORE_GROUND : MachineConst.ARM_BACK_GROUND;
+        string rightArm = Util.GetArm(model.IsRight);
         Transform rightArmTransform = transform.Find(rightArm);
         Vector3 currentRotation = rightArmTransform.rotation.eulerAngles;
         MoveJoint(rightArmTransform, -105f);
@@ -569,7 +560,7 @@ public class MachineController : MonoBehaviour
             yield break;
         }
         
-        string leftArm = model.IsRight ? MachineConst.ARM_BACK_GROUND : MachineConst.ARM_FORE_GROUND;
+        string leftArm = Util.GetArm(!model.IsRight);
         Transform shieldTransform = transform.Find(leftArm).Find(MachineConst.ELBOW).Find(MachineConst.SHIELD);
         if (shieldTransform == null)
         {
@@ -586,7 +577,7 @@ public class MachineController : MonoBehaviour
         model.IsAction = true;
         model.IsDefence = true;
 
-        string rightArm = model.IsRight ? MachineConst.ARM_FORE_GROUND : MachineConst.ARM_BACK_GROUND;
+        string rightArm = Util.GetArm(model.IsRight);
         Transform rightArmTransform = transform.Find(rightArm);
         Vector3 currentRightArmRotation = rightArmTransform.rotation.eulerAngles;
         Vector3 currentRightElbow = rightArmTransform.Find(MachineConst.ELBOW).rotation.eulerAngles;

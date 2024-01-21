@@ -287,7 +287,7 @@ public class Common
     }
 
     // PrefabMappingのvalueを取得する
-    public static GameObject GetPrefabMapping(string key, List<PrefabMapping> datas)
+    public static GameObject GetPrefabMapping(Enums.WeaponKey key, List<PrefabMapping> datas)
     {
         foreach (var data in datas)
         {

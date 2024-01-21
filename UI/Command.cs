@@ -79,10 +79,10 @@ public class Command : MonoBehaviour
             unitData.isCpu = false;
             unitData.isManual = false; // オプションに依存予定
             unitData.color = new Color(0.5f, 0.5f, 0.75f, 1f);
-            unitData.machineKey = "GimoX";
-            unitData.mainWeaponKey = "BeamGun";
-            unitData.handWeaponKey = "BeamKnife";
-            unitData.shieldKey = "Shield";
+            unitData.machineKey = Enums.WeaponKey.GimoX;
+            unitData.mainWeaponKey = Enums.WeaponKey.BeamGun;
+            unitData.handWeaponKey = Enums.WeaponKey.BeamKnife;
+            unitData.shieldKey = Enums.WeaponKey.Shield;
             // unitData.machineData = machineData;
             unitData.pilotData = pilotData;
             data.unitDatas = new List<UnitData>();
@@ -115,10 +115,10 @@ public class Command : MonoBehaviour
             unitData.isCpu = true;
             unitData.isManual = false; // オプションに依存予定
             unitData.color = new Color(0.5f, 0.5f, 0.75f, 1f);
-            unitData.machineKey = "Gimo";
-            unitData.mainWeaponKey = "BeamGun";
-            unitData.handWeaponKey = "BeamKnife";
-            unitData.shieldKey = "Shield";
+            unitData.machineKey = Enums.WeaponKey.Gimo;
+            unitData.mainWeaponKey = Enums.WeaponKey.BeamGun;
+            unitData.handWeaponKey = Enums.WeaponKey.BeamKnife;
+            unitData.shieldKey = Enums.WeaponKey.Shield;
             // unitData.machineData = machineData;
             unitData.pilotData = pilotData;
             data.unitDatas.Add(unitData);
@@ -146,10 +146,10 @@ public class Command : MonoBehaviour
             unitData.isCpu = true;
             unitData.isManual = false; // オプションに依存予定
             unitData.color = new Color(0.5f, 0.5f, 0.75f, 1f);
-            unitData.machineKey = "Gimo";
-            unitData.mainWeaponKey = "BeamGun";
-            unitData.handWeaponKey = "BeamKnife";
-            unitData.shieldKey = "Shield";
+            unitData.machineKey = Enums.WeaponKey.Gimo;
+            unitData.mainWeaponKey = Enums.WeaponKey.BeamGun;
+            unitData.handWeaponKey = Enums.WeaponKey.BeamKnife;
+            unitData.shieldKey = Enums.WeaponKey.Shield;
             // unitData.machineData = machineData;
             unitData.pilotData = pilotData;
             data.unitDatas.Add(unitData);

@@ -4,14 +4,14 @@ using UnityEngine;
 
 public class Unit : MonoBehaviour
 {
-    [SerializeField] private string machineKey; // マシンキー
-    public string MachineKey { get => machineKey; }
-    [SerializeField] private string mainWeaponKey; // メイン武器キー
-    public string MainWeaponKey { get => mainWeaponKey; }
-    [SerializeField] private string handWeaponKey; // サブ武器キー
-    public string HandWeaponKey { get => handWeaponKey; }
-    [SerializeField] private string shieldKey; // シールドキー
-    public string ShieldKey { get => shieldKey; }
+    [SerializeField] private Enums.WeaponKey machineKey; // マシンキー
+    public Enums.WeaponKey MachineKey { get => machineKey; }
+    [SerializeField] private Enums.WeaponKey mainWeaponKey; // メイン武器キー
+    public Enums.WeaponKey MainWeaponKey { get => mainWeaponKey; }
+    [SerializeField] private Enums.WeaponKey handWeaponKey; // サブ武器キー
+    public Enums.WeaponKey HandWeaponKey { get => handWeaponKey; }
+    [SerializeField] private Enums.WeaponKey shieldKey; // シールドキー
+    public Enums.WeaponKey ShieldKey { get => shieldKey; }
     [SerializeField] private bool isCpu = false; // CPUかどうか
     public bool IsCpu { get => isCpu; }
     [SerializeField] private bool isManual = false; // マニュアル操作かどうか

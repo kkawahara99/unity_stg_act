@@ -12,4 +12,20 @@ public static class Enums
         Defense,   // 防衛
         Follow,    // 追従
     }
+
+    public enum WeaponKey
+    {
+        // Machine
+        Gimo,
+        GimoCustom,
+        GimoX,
+        // MainWeapon
+        BeamGun,
+        BeamRifle,
+        // HandWeapon
+        BeamKnife,
+        BeamSaber,
+        // Shield
+        Shield,
+    }
 }

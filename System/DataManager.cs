@@ -56,10 +56,10 @@ public class UnitData
     public bool isCpu;
     public bool isManual;
     public Color color;
-    public string machineKey;
-    public string mainWeaponKey;
-    public string handWeaponKey;
-    public string shieldKey;
+    public Enums.WeaponKey machineKey;
+    public Enums.WeaponKey mainWeaponKey;
+    public Enums.WeaponKey handWeaponKey;
+    public Enums.WeaponKey shieldKey;
     // public MachineData machineData;
     public PilotData pilotData;
 }
