@@ -73,63 +73,7 @@ public class MonoCommon: MonoBehaviour
         if (gameManager.IsFailed) return;
 
         gameManager.SetIsSucceed(true);
-        StartCoroutine(SucceedCoroutine());
-    }
-
-    IEnumerator SucceedCoroutine()
-    {
-        RectTransform rectTransformL = GameObject.Find("SucceedL").GetComponent<RectTransform>();
-        RectTransform rectTransformR = GameObject.Find("SucceedR").GetComponent<RectTransform>();
-
-        // テキスト有効化
-        rectTransformL.gameObject.GetComponent<Text>().enabled = true;
-        rectTransformR.gameObject.GetComponent<Text>().enabled = true;
-
-        // 移動方向を設定（例：右方向）
-        Vector3 moveDirectionL = new Vector3(1f, 0f, 0f);
-        Vector3 moveDirectionR = new Vector3(-1f, 0f, 0f);
-
-        // 移動量を計算
-        float moveAmount = 700f * Time.deltaTime;
-
-        while (rectTransformL.position.x < 433f)
-        {
-            // テキストを移動
-            rectTransformL.Translate(moveDirectionL * moveAmount);
-            rectTransformR.Translate(moveDirectionR * moveAmount);
-            yield return null;
-        }
-        float posisionX = GameObject.Find("Canvas").GetComponent<RectTransform>().position.x;
-        rectTransformL.position = new Vector2(posisionX, rectTransformL.position.y);
-        rectTransformR.position = new Vector2(posisionX, rectTransformR.position.y);
-
-        SpriteRenderer foreground = GameObject.Find("Foreground").GetComponent<SpriteRenderer>();
-
-        float currentAlpha = 0f;
-        while (currentAlpha < 1f)
-        {
-            // 現在の透明度を取得
-            currentAlpha = foreground.color.a;
-
-            // 新しい透明度を計算
-            float newAlpha = Mathf.MoveTowards(currentAlpha, 1f, 0.25f * Time.deltaTime);
-
-            // 透明度を更新
-            Color color = foreground.color;
-            color.a = newAlpha;
-            foreground.color = color;
-            yield return null;
-        }
-
-        // 画面遷移
-        if (DataManager.Instance.currentStageNo == 7)
-        {
-            SceneManager.LoadScene("TitleScene");
-        }
-        else
-        {
-            SceneManager.LoadScene("ResultScene");
-        }
+        StartCoroutine(MissionResultCoroutine("Succeed"));
     }
 
     // ミッション失敗
@@ -141,13 +85,27 @@ public class MonoCommon: MonoBehaviour
         if (gameManager.IsSucceed) return;
 
         gameManager.SetIsFailed(true);
-        StartCoroutine(FailedCoroutine());
+        StartCoroutine(MissionResultCoroutine("Failed"));
     }
 
-    IEnumerator FailedCoroutine()
+    IEnumerator MissionResultCoroutine(string missionResult)
     {
-        RectTransform rectTransformL = GameObject.Find("FailedL").GetComponent<RectTransform>();
-        RectTransform rectTransformR = GameObject.Find("FailedR").GetComponent<RectTransform>();
+        bool isSucceed = false;
+        if (missionResult == "Succeed")
+        {
+            isSucceed = true;
+        }
+        else if (missionResult == "Failed")
+        {
+            isSucceed = false;
+        }
+        else
+        {
+            Debug.LogError("引数が不正！");
+        }
+
+        RectTransform rectTransformL = GameObject.Find($"{missionResult}L").GetComponent<RectTransform>();
+        RectTransform rectTransformR = GameObject.Find($"{missionResult}R").GetComponent<RectTransform>();
 
         // テキスト有効化
         rectTransformL.gameObject.GetComponent<Text>().enabled = true;
@@ -158,13 +116,13 @@ public class MonoCommon: MonoBehaviour
         Vector3 moveDirectionR = new Vector3(-1f, 0f, 0f);
 
         // 移動量を計算
-        float moveAmount = 700f * Time.deltaTime;
+        float moveAmount = rectTransformR.position.x / 2;
 
-        while (rectTransformL.position.x < 433f)
+        while (rectTransformL.position.x <= rectTransformR.position.x)
         {
             // テキストを移動
-            rectTransformL.Translate(moveDirectionL * moveAmount);
-            rectTransformR.Translate(moveDirectionR * moveAmount);
+            rectTransformL.Translate(moveDirectionL * moveAmount * Time.deltaTime);
+            rectTransformR.Translate(moveDirectionR * moveAmount * Time.deltaTime);
             yield return null;
         }
         float posisionX = GameObject.Find("Canvas").GetComponent<RectTransform>().position.x;
@@ -190,6 +148,13 @@ public class MonoCommon: MonoBehaviour
         }
 
         // 画面遷移
-        SceneManager.LoadScene("TitleScene");
+        if (DataManager.Instance.currentStageNo == 7 || !isSucceed)
+        {
+            SceneManager.LoadScene("TitleScene");
+        }
+        else
+        {
+            SceneManager.LoadScene("ResultScene");
+        }
     }
 }
