@@ -12,8 +12,10 @@ public class ResultManager : MonoBehaviour
     [SerializeField] GameObject pilotSlotPrefab; // Pilotスロットプレハブ
 
     private Controller controller; // コントローラ
+    private bool isCounting; // 集計中かどうか
     private bool isDoneItem; // アイテム結果画面完了
     private bool isDoneExp; // EXP結果画面完了
+    private bool isPushingButton; // ボタンが押されたかどうか
     private GameObject resultObject; // 結果画面のオブジェクト
 
     const float FADE_DURATION = 0.25f;
@@ -49,10 +51,14 @@ public class ResultManager : MonoBehaviour
 
         controller.SetShootPhase(InputActionPhase.Performed);
 
-        // 効果音（鳴らさない）
+        // 効果音
         SoundManager.Instance.PlaySE(SESoundData.SE.Submit);
 
         // 次の結果へ
+        if (isCounting)
+        {
+            isPushingButton = true;
+        }
         if (isDoneItem)
         {
             isDoneItem = false;
@@ -71,6 +77,8 @@ public class ResultManager : MonoBehaviour
         }
         if (isDoneExp)
         {
+            isDoneExp = false;
+
             // 画面遷移
             SceneManager.LoadScene("StrategyScene");
         }
@@ -212,12 +220,12 @@ public class ResultManager : MonoBehaviour
             isZeros.Add(false);
         }
 
-        // 一つでも獲得数1以上のアイテムがあったらfalseを返す
+        // 一つでも獲得数1以上のアイテムがあったらtrueを返す
         foreach (bool isZero in isZeros)
         {
-            if (!isZero) return false;
+            if (!isZero) return true;
         }
-        return true;
+        return false;
     }
 
     void UpdateExp(GameObject pilotSlot, UnitData unitData)
@@ -271,16 +279,19 @@ public class ResultManager : MonoBehaviour
             isZeros.Add(false);
         }
 
-        // 一つでも獲得EXP1以上があったらfalseを返す
+        // 一つでも獲得EXP1以上があったらtrueを返す
         foreach (bool isZero in isZeros)
         {
-            if (!isZero) return false;
+            if (!isZero) return true;
         }
-        return true;
+        return false;
     }
 
     IEnumerator ResultItemCoroutine()
     {
+        // アイテム獲得数表示中
+        isCounting = true;
+
         // 各アイテムの獲得数を順次表示していく
         foreach (Transform child in resultObject.transform)
         {
@@ -290,24 +301,31 @@ public class ResultManager : MonoBehaviour
             while (Time.time < startTime + FADE_DURATION)
             {
                 float t = (Time.time - startTime) / FADE_DURATION;
+                if (isPushingButton) t = 1;
                 Color newColor = new Color(amountColor.r, amountColor.g, amountColor.b, Mathf.Lerp(0f, 1f, t));
                 child.Find("GetAmount").GetComponent<Text>().color = newColor;
                 child.Find("GetAmount").Find("Plus").GetComponent<Text>().color = newColor;
+                if (isPushingButton) break;
                 yield return null;  // 1フレーム待つ
             }
         }
 
         // すこし待つ
-        yield return new WaitForSeconds(WAIT_TIME);
+        if (!isPushingButton)
+            yield return new WaitForSeconds(WAIT_TIME);
+
+        // アイテム増加中
+        isPushingButton = false;
 
         // 各アイテムの獲得数を所持数に追加していく（所持数は1ずつ増えていき、獲得数は減っていく演出）
-        bool isFinish = false;
-        while (!isFinish)
+        while (isCounting)
         {
-            isFinish = AddAmount();
+            isCounting = AddAmount();
 
             // 表示更新
             UpdateItemAmount();
+
+            if (isPushingButton) continue;
 
             // 効果音
             SoundManager.Instance.PlaySE(SESoundData.SE.Point1);
@@ -318,6 +336,7 @@ public class ResultManager : MonoBehaviour
 
         // コルーチン終了フラグオン
         isDoneItem = true;
+        isPushingButton = false;
     }
 
     IEnumerator ResultExpCoroutine()
@@ -333,6 +352,9 @@ public class ResultManager : MonoBehaviour
             pilotSlots.Add(pilotSlot);
         }
 
+        // EXP獲得数表示中
+        isCounting = true;
+
         // 獲得EXPを順次表示していく
         foreach (Transform child in resultObject.transform)
         {
@@ -342,27 +364,34 @@ public class ResultManager : MonoBehaviour
             while (Time.time < startTime + FADE_DURATION)
             {
                 float t = (Time.time - startTime) / FADE_DURATION;
+                if (isPushingButton) t = 1;
                 Color newColor = new Color(amountColor.r, amountColor.g, amountColor.b, Mathf.Lerp(0f, 1f, t));
                 child.Find("Plus").GetChild(0).GetComponent<Text>().color = newColor;
                 child.Find("Plus").GetComponent<Text>().color = newColor;
+                if (isPushingButton) break;
                 yield return null;  // 1フレーム待つ
             }
         }
 
         // すこし待つ
-        yield return new WaitForSeconds(WAIT_TIME);
+        if (!isPushingButton)
+            yield return new WaitForSeconds(WAIT_TIME);
+
+        // EXP増加中
+        isPushingButton = false;
 
         // EXP徐々に増やしていく
-        bool isFinish = false;
-        while (!isFinish)
+        while (isCounting)
         {
-            isFinish = AddExp(unitDatas);
+            isCounting = AddExp(unitDatas);
 
             // 表示更新
             for (int i = 0; i < pilotSlots.Count; i++)
             {
                 UpdateExp(pilotSlots[i], unitDatas[i]);
             }
+
+            if (isPushingButton) continue;
 
             // 効果音
             SoundManager.Instance.PlaySE(SESoundData.SE.Point1);
@@ -373,5 +402,6 @@ public class ResultManager : MonoBehaviour
 
         // コルーチン終了フラグオン
         isDoneExp = true;
+        isPushingButton = false;
     }
 }
